@@ -86,10 +86,11 @@
 
     #result {
       text-align: center;
-      min-height: 4rem;
+      min-height: 5rem;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
 
     #result span {
@@ -98,11 +99,21 @@
       letter-spacing: 0.06em;
       color: #fff;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.25s;
     }
 
     #result span.visible {
       opacity: 1;
+    }
+
+    #result span.spinning {
+      opacity: 1;
+      color: #666;
+    }
+
+    #result span.landing {
+      opacity: 1;
+      color: #fff;
     }
   </style>
 </head>
@@ -114,23 +125,52 @@
     <div id="result"><span id="chosen"></span></div>
   </main>
   <script>
+    let spinning = false;
+
     function pickName() {
+      if (spinning) return;
       const raw = document.getElementById('names').value;
       const names = raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
       if (names.length === 0) return;
 
+      const winner = names[Math.floor(Math.random() * names.length)];
+      const btn = document.getElementById('pick-btn');
       const chosen = document.getElementById('chosen');
-      chosen.classList.remove('visible');
 
-      setTimeout(() => {
-        chosen.textContent = names[Math.floor(Math.random() * names.length)];
-        chosen.classList.add('visible');
-      }, 150);
+      spinning = true;
+      btn.disabled = true;
+
+      const totalSteps = 20;
+      const baseDuration = 60; // ms per step at start
+      let step = 0;
+
+      chosen.className = 'spinning';
+      chosen.textContent = names[Math.floor(Math.random() * names.length)];
+
+      function nextStep() {
+        step++;
+        // Ease out: each step gets a bit slower after halfway
+        const delay = step < totalSteps / 2
+          ? baseDuration
+          : baseDuration + Math.pow(step - totalSteps / 2, 2) * 8;
+
+        if (step < totalSteps) {
+          chosen.textContent = names[Math.floor(Math.random() * names.length)];
+          setTimeout(nextStep, delay);
+        } else {
+          chosen.textContent = winner;
+          chosen.className = 'landing visible';
+          spinning = false;
+          btn.disabled = false;
+        }
+      }
+
+      setTimeout(nextStep, baseDuration);
     }
 
     document.getElementById('names').addEventListener('input', function () {
       const names = this.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
-      document.getElementById('pick-btn').disabled = names.length === 0;
+      document.getElementById('pick-btn').disabled = names.length === 0 || spinning;
     });
 
     document.getElementById('pick-btn').disabled = true;
