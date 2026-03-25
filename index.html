@@ -168,12 +168,18 @@
       setTimeout(nextStep, baseDuration);
     }
 
-    document.getElementById('names').addEventListener('input', function () {
+    const textarea = document.getElementById('names');
+
+    textarea.value = localStorage.getItem('namepicker-names') || '';
+
+    textarea.addEventListener('input', function () {
+      localStorage.setItem('namepicker-names', this.value);
       const names = this.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
       document.getElementById('pick-btn').disabled = names.length === 0 || spinning;
     });
 
-    document.getElementById('pick-btn').disabled = true;
+    const initialNames = textarea.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+    document.getElementById('pick-btn').disabled = initialNames.length === 0;
   </script>
 </body>
 </html>
