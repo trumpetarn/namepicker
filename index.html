@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Namnväljare – Jakob Markgren</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 2rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: #1a1a1a;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 300;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    textarea::placeholder {
+      color: #555;
+    }
+
+    textarea:focus {
+      border-color: #666;
+    }
+
+    button {
+      background: #fff;
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button:hover {
+      background: #ddd;
+    }
+
+    button:disabled {
+      background: #333;
+      color: #666;
+      cursor: default;
+    }
+
+    #result {
+      text-align: center;
+      min-height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #result span {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #result span.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Namnväljare</h1>
+    <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
+    <button id="pick-btn" onclick="pickName()">Välj ett namn</button>
+    <div id="result"><span id="chosen"></span></div>
+  </main>
+  <script>
+    function pickName() {
+      const raw = document.getElementById('names').value;
+      const names = raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+      if (names.length === 0) return;
+
+      const chosen = document.getElementById('chosen');
+      chosen.classList.remove('visible');
+
+      setTimeout(() => {
+        chosen.textContent = names[Math.floor(Math.random() * names.length)];
+        chosen.classList.add('visible');
+      }, 150);
+    }
+
+    document.getElementById('names').addEventListener('input', function () {
+      const names = this.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+      document.getElementById('pick-btn').disabled = names.length === 0;
+    });
+
+    document.getElementById('pick-btn').disabled = true;
+  </script>
+</body>
+</html>
