@@ -193,7 +193,7 @@
     }
 
     function addToHistory(name) {
-      const history = loadHistory().filter(n => n !== name);
+      const history = loadHistory();
       history.unshift(name);
       saveHistory(history.slice(0, MAX_HISTORY));
       renderHistory();
