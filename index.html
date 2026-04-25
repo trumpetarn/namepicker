@@ -115,6 +115,44 @@
       opacity: 1;
       color: #fff;
     }
+
+    #history {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    #history h2 {
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    #history ol {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    #history li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: #aaa;
+    }
+
+    #history li .rank {
+      font-size: 0.7rem;
+      color: #444;
+      width: 1rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -123,9 +161,43 @@
     <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
     <button id="pick-btn" onclick="pickName()">Välj ett namn</button>
     <div id="result"><span id="chosen"></span></div>
+    <div id="history" style="display:none">
+      <h2>Historik</h2>
+      <ol id="history-list"></ol>
+    </div>
   </main>
   <script>
     let spinning = false;
+
+    const HISTORY_KEY = 'namepicker-history';
+    const MAX_HISTORY = 10;
+
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function renderHistory() {
+      const history = loadHistory();
+      const section = document.getElementById('history');
+      const list = document.getElementById('history-list');
+      if (history.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = 'flex';
+      list.innerHTML = history.map((name, i) =>
+        `<li><span class="rank">${i + 1}</span>${name}</li>`
+      ).join('');
+    }
+
+    function addToHistory(name) {
+      const history = loadHistory();
+      history.unshift(name);
+      saveHistory(history.slice(0, MAX_HISTORY));
+      renderHistory();
+    }
 
     function pickName() {
       if (spinning) return;
@@ -141,7 +213,7 @@
       btn.disabled = true;
 
       const totalSteps = 20;
-      const baseDuration = 60; // ms per step at start
+      const baseDuration = 60;
       let step = 0;
 
       chosen.className = 'spinning';
@@ -149,7 +221,6 @@
 
       function nextStep() {
         step++;
-        // Ease out: each step gets a bit slower after halfway
         const delay = step < totalSteps / 2
           ? baseDuration
           : baseDuration + Math.pow(step - totalSteps / 2, 2) * 8;
@@ -162,6 +233,7 @@
           chosen.className = 'landing visible';
           spinning = false;
           btn.disabled = false;
+          addToHistory(winner);
         }
       }
 
@@ -180,6 +252,8 @@
 
     const initialNames = textarea.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
     document.getElementById('pick-btn').disabled = initialNames.length === 0;
+
+    renderHistory();
   </script>
 </body>
 </html>
