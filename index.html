@@ -37,7 +37,7 @@
 
     textarea {
       width: 100%;
-      height: 180px;
+      min-height: 180px;
       background: #1a1a1a;
       color: #fff;
       border: 1px solid #333;
@@ -106,14 +106,236 @@
       opacity: 1;
     }
 
-    #result span.spinning {
-      opacity: 1;
-      color: #666;
-    }
-
     #result span.landing {
       opacity: 1;
       color: #fff;
+    }
+
+    #mode-switch {
+      display: flex;
+      border: 1px solid #333;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    #mode-switch button {
+      flex: 1;
+      background: transparent;
+      color: #888;
+      border-radius: 0;
+      padding: 0.6rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+
+    #mode-switch button + button {
+      border-left: 1px solid #333;
+    }
+
+    #mode-switch button:hover {
+      background: #1a1a1a;
+      color: #fff;
+    }
+
+    #mode-switch button[aria-pressed="true"] {
+      background: #fff;
+      color: #111;
+    }
+
+    #mode-switch button:disabled {
+      background: transparent;
+      color: #444;
+    }
+
+    #mode-switch button[aria-pressed="true"]:disabled {
+      background: #333;
+      color: #888;
+    }
+
+    .stage-panel {
+      display: none;
+      position: relative;
+      justify-content: center;
+    }
+
+    .stage-panel.active {
+      display: flex;
+    }
+
+    /* Lyckohjul */
+    #wheel-wrap {
+      position: relative;
+      width: min(320px, 100%);
+      aspect-ratio: 1;
+    }
+
+    #wheel {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #wheel-pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 24px solid #fff;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6));
+      z-index: 1;
+    }
+
+    /* Hatten */
+    #hat-stage.active {
+      height: 240px;
+      overflow: hidden;
+    }
+
+    #hat {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 200px;
+      height: 170px;
+      margin-left: -100px;
+      transform-origin: 50% 100%;
+      z-index: 2;
+    }
+
+    #hat.shaking {
+      animation: hat-shake 0.25s ease-in-out 6;
+    }
+
+    @keyframes hat-shake {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-6deg); }
+      75% { transform: rotate(6deg); }
+    }
+
+    #hat-slips {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .hat-slip {
+      position: absolute;
+      left: 50%;
+      top: 110px;
+      width: 64px;
+      height: 20px;
+      margin-left: -32px;
+      background: #e8e0c8;
+      color: #333;
+      font-size: 0.6rem;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      white-space: nowrap;
+      animation: slip-peek 0.7s ease-in-out var(--delay) both;
+    }
+
+    @keyframes slip-peek {
+      0%, 100% { transform: translate(var(--dx), 0) rotate(var(--rot)); }
+      50% { transform: translate(var(--dx), -55px) rotate(calc(var(--rot) * -1)); }
+    }
+
+    #hat-note {
+      position: absolute;
+      left: 50%;
+      top: 110px;
+      width: 100px;
+      height: 40px;
+      transform: translate(-50%, 0) rotate(-3deg);
+      opacity: 0;
+      background: #f3ecd8 linear-gradient(to bottom, transparent 48%, rgba(0, 0, 0, 0.18) 50%, transparent 52%);
+      color: #111;
+      border-radius: 3px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.2s, width 0.45s ease, height 0.45s ease;
+    }
+
+    #hat-note.risen {
+      opacity: 1;
+      transform: translate(-50%, -100px) rotate(2deg);
+    }
+
+    #hat-note.open {
+      width: min(280px, 100%);
+      height: 64px;
+      background-image: none;
+      transform: translate(-50%, -100px) rotate(0);
+    }
+
+    #hat-note span {
+      max-width: 100%;
+      padding: 0 1rem;
+      font-size: 1.4rem;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transition: opacity 0.3s 0.25s;
+    }
+
+    #hat-note.open span {
+      opacity: 1;
+    }
+
+    /* Enarmad bandit */
+    #slot-machine {
+      position: relative;
+      width: 100%;
+    }
+
+    #reel-window {
+      height: 224px;
+      overflow: hidden;
+      background: #1a1a1a;
+      border-radius: 6px;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+    }
+
+    #reel {
+      will-change: transform;
+    }
+
+    .reel-item {
+      height: 56px;
+      line-height: 56px;
+      padding: 0 1rem;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .reel-item.win {
+      color: #fff;
+    }
+
+    #reel-frame {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 84px;
+      height: 56px;
+      border-top: 1px solid #555;
+      border-bottom: 1px solid #555;
+      pointer-events: none;
     }
 
     #history {
@@ -179,6 +401,35 @@
   <main>
     <h1>Namnväljare</h1>
     <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
+    <div id="mode-switch" role="group" aria-label="Dragningsläge">
+      <button type="button" data-mode="wheel">Lyckohjul</button>
+      <button type="button" data-mode="hat">Hatten</button>
+      <button type="button" data-mode="slot">Enarmad bandit</button>
+    </div>
+    <div id="stage">
+      <div class="stage-panel" id="wheel-stage">
+        <div id="wheel-wrap">
+          <div id="wheel-pointer"></div>
+          <canvas id="wheel"></canvas>
+        </div>
+      </div>
+      <div class="stage-panel" id="hat-stage">
+        <div id="hat-note"><span></span></div>
+        <div id="hat-slips"></div>
+        <svg id="hat" viewBox="0 0 200 170" aria-hidden="true">
+          <path d="M40 40 L50 150 Q100 168 150 150 L160 40 Z" fill="#222" stroke="#444" stroke-width="2"/>
+          <path d="M41.6 58 L158.4 58 L156.8 76 L43.2 76 Z" fill="#b3261e"/>
+          <ellipse cx="100" cy="40" rx="92" ry="16" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+          <ellipse cx="100" cy="40" rx="60" ry="9" fill="#050505"/>
+        </svg>
+      </div>
+      <div class="stage-panel" id="slot-stage">
+        <div id="slot-machine">
+          <div id="reel-window"><div id="reel"></div></div>
+          <div id="reel-frame"></div>
+        </div>
+      </div>
+    </div>
     <button id="pick-btn" onclick="pickName()">Välj ett namn</button>
     <div id="result"><span id="chosen"></span></div>
     <div id="history" style="display:none">
@@ -232,10 +483,35 @@
       requestAnimationFrame(animate);
     }
 
-    function playFanfare() {
+    let audioCtx = null;
+
+    function getAudio() {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const actx = new AudioCtx();
+      if (!AudioCtx) return null;
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTick(freq = 1400) {
+      const actx = getAudio();
+      if (!actx) return;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      const t = actx.currentTime;
+      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      osc.start(t);
+      osc.stop(t + 0.05);
+    }
+
+    function playFanfare() {
+      const actx = getAudio();
+      if (!actx) return;
 
       function note(freq, startOffset, duration, vol = 0.28) {
         const osc = actx.createOscillator();
@@ -303,61 +579,327 @@
       renderHistory();
     }
 
-    function pickName() {
+    const MODE_KEY = 'namepicker-mode';
+    const MODES = ['wheel', 'hat', 'slot'];
+    const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken' };
+    let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
+
+    const pickBtn = document.getElementById('pick-btn');
+    const chosen = document.getElementById('chosen');
+    const modeBtns = document.querySelectorAll('#mode-switch button');
+
+    function getNames() {
+      return document.getElementById('names').value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+    }
+
+    function setMode(m) {
+      mode = m;
+      localStorage.setItem(MODE_KEY, m);
+      modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+      document.querySelectorAll('.stage-panel').forEach(p => p.classList.toggle('active', p.id === m + '-stage'));
+      pickBtn.textContent = PICK_LABELS[m];
+      refreshStage();
+    }
+
+    function refreshStage() {
       if (spinning) return;
-      const raw = document.getElementById('names').value;
-      const names = raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
-      if (names.length === 0) return;
+      const names = getNames();
+      if (mode === 'wheel') drawWheel(names);
+      else if (mode === 'slot') showIdleReel(names);
+    }
 
-      const winner = names[Math.floor(Math.random() * names.length)];
-      const btn = document.getElementById('pick-btn');
-      const chosen = document.getElementById('chosen');
+    function setSpinning(on) {
+      spinning = on;
+      pickBtn.disabled = on || getNames().length === 0;
+      modeBtns.forEach(b => b.disabled = on);
+    }
 
-      spinning = true;
-      btn.disabled = true;
+    // --- Lyckohjul ---
 
-      const totalSteps = 20;
-      const baseDuration = 60;
-      let step = 0;
+    const WHEEL_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#f06292'];
+    const TAU = Math.PI * 2;
+    let wheelRot = 0;
 
-      chosen.className = 'spinning';
-      chosen.textContent = names[Math.floor(Math.random() * names.length)];
+    function fitText(ctx, text, maxWidth) {
+      if (ctx.measureText(text).width <= maxWidth) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
+      return t + '…';
+    }
 
-      function nextStep() {
-        step++;
-        const delay = step < totalSteps / 2
-          ? baseDuration
-          : baseDuration + Math.pow(step - totalSteps / 2, 2) * 8;
+    function drawWheel(names) {
+      const canvas = document.getElementById('wheel');
+      const size = canvas.clientWidth;
+      if (!size) return;
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.round(size * dpr)) {
+        canvas.width = canvas.height = Math.round(size * dpr);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, size, size);
 
-        if (step < totalSteps) {
-          chosen.textContent = names[Math.floor(Math.random() * names.length)];
-          setTimeout(nextStep, delay);
-        } else {
-          chosen.textContent = winner;
-          chosen.className = 'landing visible';
-          spinning = false;
-          btn.disabled = false;
-          addToHistory(winner);
-          launchConfetti();
-          playFanfare();
-        }
+      const c = size / 2;
+      const r = c - 4;
+
+      if (names.length === 0) {
+        ctx.beginPath();
+        ctx.arc(c, c, r, 0, TAU);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#555';
+        ctx.font = '300 1rem system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Lägg till namn', c, c);
+        return;
       }
 
-      setTimeout(nextStep, baseDuration);
+      const seg = TAU / names.length;
+      const fontSize = Math.max(10, Math.min(18, seg * r * 0.45));
+
+      names.forEach((name, i) => {
+        // Slice 0 starts at the pointer (top) and slices run clockwise.
+        const start = wheelRot + i * seg - Math.PI / 2;
+        let color = WHEEL_COLORS[i % WHEEL_COLORS.length];
+        // Avoid the last slice sharing a colour with its neighbour, slice 0.
+        if (i > 0 && i === names.length - 1 && i % WHEEL_COLORS.length === 0) color = WHEEL_COLORS[2];
+
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.arc(c, c, r, start, start + seg);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = names.length > 40 ? 0.5 : 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(c, c);
+        ctx.rotate(start + seg / 2);
+        ctx.fillStyle = '#111';
+        ctx.font = `500 ${fontSize}px system-ui, sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fitText(ctx, name, r * 0.72), r - 12, 0);
+        ctx.restore();
+      });
+
+      ctx.beginPath();
+      ctx.arc(c, c, r * 0.12, 0, TAU);
+      ctx.fillStyle = '#111';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function spinWheel(names, winnerIdx, onDone) {
+      const seg = TAU / names.length;
+      // Rotation that puts the winner's slice under the pointer, landing somewhere inside the slice.
+      const jitter = (Math.random() - 0.5) * seg * 0.7;
+      const desired = -(winnerIdx + 0.5) * seg + jitter;
+      const startRot = wheelRot;
+      const delta = (((desired - startRot) % TAU) + TAU) % TAU;
+      const target = startRot + delta + TAU * (5 + Math.floor(Math.random() * 2));
+      const duration = 8000 + Math.random() * 1500;
+      const t0 = performance.now();
+      let lastSlice = Math.floor(startRot / seg);
+
+      function frame(now) {
+        const p = Math.min(1, (now - t0) / duration);
+        wheelRot = startRot + (target - startRot) * (1 - Math.pow(1 - p, 3));
+        const slice = Math.floor(wheelRot / seg);
+        if (slice !== lastSlice) {
+          lastSlice = slice;
+          playTick();
+        }
+        drawWheel(names);
+        if (p < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          wheelRot %= TAU;
+          onDone();
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // --- Hatten ---
+
+    function drawFromHat(names, winner, onDone) {
+      const hat = document.getElementById('hat');
+      const note = document.getElementById('hat-note');
+      const slips = document.getElementById('hat-slips');
+
+      // Snap the previous note back into the hat without animating.
+      note.style.transition = 'none';
+      note.className = '';
+      void note.offsetWidth;
+      note.style.transition = '';
+      note.querySelector('span').textContent = winner;
+
+      hat.classList.remove('shaking');
+      void hat.getBoundingClientRect();
+      hat.classList.add('shaking');
+
+      slips.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const slip = document.createElement('div');
+        slip.className = 'hat-slip';
+        slip.textContent = names[Math.floor(Math.random() * names.length)];
+        slip.style.setProperty('--dx', `${(Math.random() - 0.5) * 50}px`);
+        slip.style.setProperty('--rot', `${(Math.random() - 0.5) * 30}deg`);
+        slip.style.setProperty('--delay', `${i * 0.2}s`);
+        slips.appendChild(slip);
+        setTimeout(() => playTick(600 + Math.random() * 300), i * 200 + 350);
+      }
+
+      setTimeout(() => {
+        hat.classList.remove('shaking');
+        slips.innerHTML = '';
+        note.classList.add('risen');
+      }, 1600);
+      setTimeout(() => note.classList.add('open'), 2700);
+      setTimeout(onDone, 3200);
+    }
+
+    // --- Enarmad bandit ---
+
+    // The reel is the name list in order, looping forever. The window shows the centred
+    // name plus one full and one half row on each side, so the list visibly continues.
+    const ROW_H = 56;
+    const REEL_CENTER_Y = 84;
+    const REEL_PAD = 2;
+    const reel = document.getElementById('reel');
+    let reelPos = 0;
+
+    function reelName(names, i) {
+      const n = names.length;
+      return names[((i % n) + n) % n];
+    }
+
+    function buildReel(names, from, count) {
+      reel.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const item = document.createElement('div');
+        item.className = 'reel-item';
+        item.textContent = names.length ? reelName(names, from + i) : '';
+        reel.appendChild(item);
+      }
+    }
+
+    // translateY that puts strip row k in the centre frame.
+    function reelOffset(k) {
+      return REEL_CENTER_Y - k * ROW_H;
+    }
+
+    function showIdleReel(names) {
+      if (names.length) reelPos %= names.length;
+      buildReel(names, reelPos - REEL_PAD, REEL_PAD * 2 + 1);
+      reel.style.transform = `translateY(${reelOffset(REEL_PAD)}px)`;
+    }
+
+    function spinSlot(names, winnerIdx, onDone) {
+      const n = names.length;
+      // Always travel forward through the list, at least ~30 rows, ending on the winner.
+      const distance = ((winnerIdx - reelPos) % n + n) % n + n * Math.max(2, Math.ceil(30 / n));
+      buildReel(names, reelPos - REEL_PAD, distance + REEL_PAD * 2 + 1);
+
+      const startY = reelOffset(REEL_PAD);
+      const endY = reelOffset(REEL_PAD + distance);
+      const overshootY = endY - ROW_H * 0.35;
+      const runTime = 6500;
+      const settleTime = 350;
+      const t0 = performance.now();
+      let lastY = startY;
+      let lastRow = REEL_PAD;
+
+      function frame(now) {
+        const t = now - t0;
+        let y;
+        if (t < runTime) {
+          const p = t / runTime;
+          y = startY + (overshootY - startY) * (1 - Math.pow(1 - p, 3));
+        } else {
+          const p = Math.min(1, (t - runTime) / settleTime);
+          y = overshootY + (endY - overshootY) * (0.5 - Math.cos(Math.PI * p) / 2);
+        }
+        reel.style.transform = `translateY(${y}px)`;
+        reel.style.filter = `blur(${Math.min(4, Math.abs(y - lastY) / 12)}px)`;
+        lastY = y;
+        const row = Math.round((REEL_CENTER_Y - y) / ROW_H);
+        if (row !== lastRow) {
+          lastRow = row;
+          playTick();
+        }
+        if (t < runTime + settleTime) {
+          requestAnimationFrame(frame);
+        } else {
+          reel.style.filter = '';
+          reelPos = winnerIdx;
+          showIdleReel(names);
+          reel.children[REEL_PAD].classList.add('win');
+          onDone();
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // --- Dragning ---
+
+    function land(winner) {
+      chosen.textContent = winner;
+      chosen.className = 'landing visible';
+      setSpinning(false);
+      addToHistory(winner);
+      launchConfetti();
+      playFanfare();
+    }
+
+    function pickName() {
+      if (spinning) return;
+      const names = getNames();
+      if (names.length === 0) return;
+
+      const winnerIdx = Math.floor(Math.random() * names.length);
+      const winner = names[winnerIdx];
+      const done = () => land(winner);
+
+      setSpinning(true);
+      chosen.className = '';
+
+      if (mode === 'wheel') spinWheel(names, winnerIdx, done);
+      else if (mode === 'hat') drawFromHat(names, winner, done);
+      else spinSlot(names, winnerIdx, done);
     }
 
     const textarea = document.getElementById('names');
 
+    function autoResize() {
+      textarea.style.height = 'auto';
+      textarea.style.height = (textarea.scrollHeight + textarea.offsetHeight - textarea.clientHeight) + 'px';
+    }
+
     textarea.value = localStorage.getItem('namepicker-names') || '';
+    autoResize();
 
     textarea.addEventListener('input', function () {
       localStorage.setItem('namepicker-names', this.value);
-      const names = this.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
-      document.getElementById('pick-btn').disabled = names.length === 0 || spinning;
+      autoResize();
+      pickBtn.disabled = getNames().length === 0 || spinning;
+      refreshStage();
     });
 
-    const initialNames = textarea.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
-    document.getElementById('pick-btn').disabled = initialNames.length === 0;
+    modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    window.addEventListener('resize', () => { if (!spinning) refreshStage(); });
+
+    pickBtn.disabled = getNames().length === 0;
+    setMode(mode);
 
     renderHistory();
   </script>
