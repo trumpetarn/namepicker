@@ -111,6 +111,109 @@
       color: #fff;
     }
 
+    #group-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    #group-tabs {
+      display: flex;
+      gap: 0.25rem;
+      overflow-x: auto;
+      border-bottom: 1px solid #333;
+      scrollbar-width: none;
+    }
+
+    #group-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .group-tab {
+      flex-shrink: 0;
+      max-width: 12rem;
+      margin-bottom: -1px;
+      background: transparent;
+      color: #888;
+      border-bottom: 2px solid transparent;
+      border-radius: 6px 6px 0 0;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .group-tab:hover {
+      background: #1a1a1a;
+      color: #fff;
+    }
+
+    .group-tab[aria-selected="true"] {
+      color: #fff;
+      border-bottom-color: #fff;
+    }
+
+    .group-tab.group-add {
+      font-size: 1rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    .group-tab:disabled {
+      background: transparent;
+      color: #444;
+    }
+
+    .group-tab[aria-selected="true"]:disabled {
+      color: #888;
+      border-bottom-color: #888;
+    }
+
+    #group-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    #group-actions button {
+      background: none;
+      color: #666;
+      padding: 0;
+      font-size: 0.7rem;
+      font-weight: 400;
+    }
+
+    #group-actions button:hover {
+      color: #fff;
+    }
+
+    #group-actions #toggle-names {
+      margin-right: auto;
+    }
+
+    /* Namnlistan dold: ge hjulet och hatten mer plats */
+    main.names-hidden #names {
+      display: none;
+    }
+
+    main.names-hidden #wheel-wrap {
+      width: 100%;
+    }
+
+    main.names-hidden #hat-stage.active {
+      height: 360px;
+    }
+
+    main.names-hidden #hat-scene {
+      transform: scale(1.5);
+    }
+
+    #group-actions button:disabled {
+      background: none;
+      color: #333;
+    }
+
     #mode-switch {
       display: flex;
       border: 1px solid #333;
@@ -191,6 +294,15 @@
     #hat-stage.active {
       height: 240px;
       overflow: hidden;
+    }
+
+    #hat-scene {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 240px;
+      transform-origin: 50% 100%;
     }
 
     #hat {
@@ -344,6 +456,25 @@
       gap: 0.5rem;
     }
 
+    #history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #export-history {
+      background: none;
+      color: #666;
+      padding: 0;
+      font-size: 0.7rem;
+      font-weight: 400;
+    }
+
+    #export-history:hover {
+      background: none;
+      color: #fff;
+    }
+
     #history h2 {
       font-size: 0.75rem;
       font-weight: 400;
@@ -400,11 +531,20 @@
   <canvas id="confetti-canvas"></canvas>
   <main>
     <h1>Namnväljare</h1>
+    <div id="group-bar">
+      <div id="group-tabs" role="tablist" aria-label="Grupper"></div>
+      <div id="group-actions">
+        <button type="button" id="toggle-names" aria-controls="names">Dölj namn</button>
+        <button type="button" id="rename-group">Byt namn</button>
+        <button type="button" id="delete-group">Ta bort</button>
+        <button type="button" id="share-group">Dela</button>
+      </div>
+    </div>
     <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
     <div id="mode-switch" role="group" aria-label="Dragningsläge">
-      <button type="button" data-mode="wheel">Lyckohjul</button>
+      <button type="button" data-mode="wheel">Lyckohjulet</button>
       <button type="button" data-mode="hat">Hatten</button>
-      <button type="button" data-mode="slot">Enarmad bandit</button>
+      <button type="button" data-mode="slot">Enarmade banditen</button>
     </div>
     <div id="stage">
       <div class="stage-panel" id="wheel-stage">
@@ -414,14 +554,16 @@
         </div>
       </div>
       <div class="stage-panel" id="hat-stage">
-        <div id="hat-note"><span></span></div>
-        <div id="hat-slips"></div>
-        <svg id="hat" viewBox="0 0 200 170" aria-hidden="true">
-          <path d="M40 40 L50 150 Q100 168 150 150 L160 40 Z" fill="#222" stroke="#444" stroke-width="2"/>
-          <path d="M41.6 58 L158.4 58 L156.8 76 L43.2 76 Z" fill="#b3261e"/>
-          <ellipse cx="100" cy="40" rx="92" ry="16" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-          <ellipse cx="100" cy="40" rx="60" ry="9" fill="#050505"/>
-        </svg>
+        <div id="hat-scene">
+          <div id="hat-note"><span></span></div>
+          <div id="hat-slips"></div>
+          <svg id="hat" viewBox="0 0 200 170" aria-hidden="true">
+            <path d="M40 40 L50 150 Q100 168 150 150 L160 40 Z" fill="#222" stroke="#444" stroke-width="2"/>
+            <path d="M41.6 58 L158.4 58 L156.8 76 L43.2 76 Z" fill="#b3261e"/>
+            <ellipse cx="100" cy="40" rx="92" ry="16" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+            <ellipse cx="100" cy="40" rx="60" ry="9" fill="#050505"/>
+          </svg>
+        </div>
       </div>
       <div class="stage-panel" id="slot-stage">
         <div id="slot-machine">
@@ -433,7 +575,10 @@
     <button id="pick-btn" onclick="pickName()">Välj ett namn</button>
     <div id="result"><span id="chosen"></span></div>
     <div id="history" style="display:none">
-      <h2>Historik</h2>
+      <div id="history-head">
+        <h2>Historik</h2>
+        <button type="button" id="export-history">Exportera CSV</button>
+      </div>
       <ol id="history-list"></ol>
     </div>
   </main>
@@ -540,20 +685,38 @@
 
     let spinning = false;
 
-    const HISTORY_KEY = 'namepicker-history';
+    // Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, date }] }] }
+    const GROUPS_KEY = 'namepicker-groups';
     const MAX_HISTORY = 25;
 
-    function loadHistory() {
-      try {
-        const raw = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-        return raw.map(entry =>
-          typeof entry === 'string' ? { name: entry, date: null } : entry
-        );
-      } catch { return []; }
+    function newId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     }
 
-    function saveHistory(history) {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    function loadGroups() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(GROUPS_KEY));
+        if (saved && Array.isArray(saved.groups) && saved.groups.length) return saved;
+      } catch {}
+      // First run with groups: move the old single list and history into a group.
+      let history = [];
+      try {
+        history = (JSON.parse(localStorage.getItem('namepicker-history')) || []).map(entry =>
+          typeof entry === 'string' ? { name: entry, date: null } : entry
+        );
+      } catch {}
+      const group = { id: newId(), name: 'Min grupp', names: localStorage.getItem('namepicker-names') || '', history };
+      return { active: group.id, groups: [group] };
+    }
+
+    let state = loadGroups();
+
+    function saveGroups() {
+      localStorage.setItem(GROUPS_KEY, JSON.stringify(state));
+    }
+
+    function activeGroup() {
+      return state.groups.find(g => g.id === state.active) || state.groups[0];
     }
 
     function formatHistDate(iso) {
@@ -561,21 +724,64 @@
       return new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
+    function histSpan(className, text) {
+      const span = document.createElement('span');
+      span.className = className;
+      span.textContent = text;
+      return span;
+    }
+
     function renderHistory() {
-      const history = loadHistory();
+      const history = activeGroup().history;
       const section = document.getElementById('history');
       const list = document.getElementById('history-list');
       if (history.length === 0) { section.style.display = 'none'; return; }
       section.style.display = 'flex';
-      list.innerHTML = history.map((entry, i) =>
-        `<li><span class="rank">${i + 1}</span><span class="hist-name">${entry.name}</span>${entry.date ? `<span class="hist-date">${formatHistDate(entry.date)}</span>` : ''}</li>`
-      ).join('');
+      // Built with textContent: names can come from someone else's share link.
+      list.replaceChildren(...history.map((entry, i) => {
+        const li = document.createElement('li');
+        li.append(histSpan('rank', i + 1), histSpan('hist-name', entry.name));
+        if (entry.date) li.append(histSpan('hist-date', formatHistDate(entry.date)));
+        return li;
+      }));
+    }
+
+    // Semicolon-separated with a UTF-8 BOM so Swedish Excel opens it with columns and åäö intact.
+    function csvCell(value) {
+      let text = String(value);
+      // Stop spreadsheet apps from treating a name as a formula (names can come from share links).
+      if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+      return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function exportHistory() {
+      const group = activeGroup();
+      const rows = [['Grupp', 'Namn', 'Datum', 'Tid']];
+      for (const entry of group.history) {
+        const d = entry.date ? new Date(entry.date) : null;
+        rows.push([
+          group.name,
+          entry.name,
+          d ? d.toLocaleDateString('sv-SE') : '',
+          d ? d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '',
+        ]);
+      }
+      const csv = '\ufeff' + rows.map(r => r.map(csvCell).join(';')).join('\r\n') + '\r\n';
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `namnvaljare-${group.name.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').toLowerCase() || 'grupp'}-${new Date().toLocaleDateString('sv-SE')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function addToHistory(name) {
-      const history = loadHistory();
-      history.unshift({ name, date: new Date().toISOString() });
-      saveHistory(history.slice(0, MAX_HISTORY));
+      const group = activeGroup();
+      group.history.unshift({ name, date: new Date().toISOString() });
+      group.history = group.history.slice(0, MAX_HISTORY);
+      saveGroups();
       renderHistory();
     }
 
@@ -612,6 +818,7 @@
       spinning = on;
       pickBtn.disabled = on || getNames().length === 0;
       modeBtns.forEach(b => b.disabled = on);
+      updateGroupControls();
     }
 
     // --- Lyckohjul ---
@@ -731,16 +938,24 @@
 
     // --- Hatten ---
 
+    // Snap the previous note back into the hat without animating.
+    function resetHat() {
+      const note = document.getElementById('hat-note');
+      note.style.transition = 'none';
+      note.className = '';
+      note.querySelector('span').textContent = '';
+      void note.offsetWidth;
+      note.style.transition = '';
+      document.getElementById('hat').classList.remove('shaking');
+      document.getElementById('hat-slips').innerHTML = '';
+    }
+
     function drawFromHat(names, winner, onDone) {
       const hat = document.getElementById('hat');
       const note = document.getElementById('hat-note');
       const slips = document.getElementById('hat-slips');
 
-      // Snap the previous note back into the hat without animating.
-      note.style.transition = 'none';
-      note.className = '';
-      void note.offsetWidth;
-      note.style.transition = '';
+      resetHat();
       note.querySelector('span').textContent = winner;
 
       hat.classList.remove('shaking');
@@ -885,23 +1100,211 @@
       textarea.style.height = (textarea.scrollHeight + textarea.offsetHeight - textarea.clientHeight) + 'px';
     }
 
-    textarea.value = localStorage.getItem('namepicker-names') || '';
-    autoResize();
+    // --- Grupper ---
+
+    function namesFromText(text) {
+      return text.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+    }
+
+    function updateGroupControls() {
+      document.querySelectorAll('#group-bar button').forEach(b => b.disabled = spinning);
+      if (state.groups.length === 1) document.getElementById('delete-group').disabled = true;
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById('group-tabs');
+      tabs.replaceChildren();
+      for (const group of state.groups) {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'group-tab';
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-selected', group.id === state.active);
+        tab.textContent = group.name;
+        tab.title = group.name;
+        tab.addEventListener('click', () => switchGroup(group.id));
+        tab.addEventListener('dblclick', renameGroup);
+        tabs.appendChild(tab);
+      }
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'group-tab group-add';
+      add.textContent = '+';
+      add.title = 'Ny grupp';
+      add.setAttribute('aria-label', 'Ny grupp');
+      add.addEventListener('click', addGroup);
+      tabs.appendChild(add);
+      tabs.querySelector('[aria-selected="true"]').scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      updateGroupControls();
+    }
+
+    const NAMES_HIDDEN_KEY = 'namepicker-names-hidden';
+    const toggleNamesBtn = document.getElementById('toggle-names');
+
+    function namesHidden() {
+      return document.querySelector('main').classList.contains('names-hidden');
+    }
+
+    function updateToggleLabel() {
+      toggleNamesBtn.textContent = namesHidden() ? `Visa namn (${getNames().length})` : 'Dölj namn';
+      toggleNamesBtn.setAttribute('aria-expanded', !namesHidden());
+    }
+
+    function setNamesHidden(hidden) {
+      document.querySelector('main').classList.toggle('names-hidden', hidden);
+      localStorage.setItem(NAMES_HIDDEN_KEY, hidden ? '1' : '0');
+      // The textarea can't be measured while hidden, so size it when it reappears.
+      if (!hidden) autoResize();
+      updateToggleLabel();
+      refreshStage();
+    }
+
+    function showActiveGroup() {
+      textarea.value = activeGroup().names;
+      autoResize();
+      pickBtn.disabled = getNames().length === 0;
+      chosen.className = '';
+      chosen.textContent = '';
+      reelPos = 0;
+      resetHat();
+      updateToggleLabel();
+      renderTabs();
+      renderHistory();
+      refreshStage();
+    }
+
+    function switchGroup(id) {
+      if (spinning || id === state.active) return;
+      state.active = id;
+      saveGroups();
+      showActiveGroup();
+    }
+
+    function uniqueGroupName(name) {
+      let result = name;
+      for (let i = 2; state.groups.some(g => g.name === result); i++) result = `${name} (${i})`;
+      return result;
+    }
+
+    function addGroup() {
+      const name = (prompt('Namn på den nya gruppen:') || '').trim().slice(0, 40);
+      if (!name) return;
+      const group = { id: newId(), name: uniqueGroupName(name), names: '', history: [] };
+      state.groups.push(group);
+      switchGroup(group.id);
+      textarea.focus();
+    }
+
+    function renameGroup() {
+      if (spinning) return;
+      const group = activeGroup();
+      const name = (prompt('Nytt namn på gruppen:', group.name) || '').trim().slice(0, 40);
+      if (!name || name === group.name) return;
+      group.name = uniqueGroupName(name);
+      saveGroups();
+      renderTabs();
+    }
+
+    function deleteGroup() {
+      if (spinning || state.groups.length === 1) return;
+      const group = activeGroup();
+      if (!confirm(`Ta bort gruppen "${group.name}" med namnlista och historik?`)) return;
+      const idx = state.groups.indexOf(group);
+      state.groups.splice(idx, 1);
+      state.active = state.groups[Math.max(0, idx - 1)].id;
+      saveGroups();
+      showActiveGroup();
+    }
+
+    // --- Dela ---
+
+    // The group travels in the URL fragment (#dela=…), so it never reaches the server.
+    function encodeShare(group) {
+      const json = JSON.stringify({ n: group.name, l: namesFromText(group.names) });
+      let bin = '';
+      new TextEncoder().encode(json).forEach(b => bin += String.fromCharCode(b));
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function decodeShare(str) {
+      try {
+        const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/'));
+        const data = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+        if (typeof data.n !== 'string' || !Array.isArray(data.l)) return null;
+        const names = data.l.filter(n => typeof n === 'string').map(n => n.trim().slice(0, 100)).filter(Boolean).slice(0, 500);
+        return { name: data.n.trim().slice(0, 40) || 'Delad grupp', names };
+      } catch {
+        return null;
+      }
+    }
+
+    async function shareGroup() {
+      const group = activeGroup();
+      const url = `${location.origin}${location.pathname}#dela=${encodeShare(group)}`;
+      const btn = document.getElementById('share-group');
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        try { await navigator.share({ title: `Namnväljare – ${group.name}`, url }); } catch {}
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        btn.textContent = 'Länk kopierad!';
+        setTimeout(() => btn.textContent = 'Dela', 2000);
+      } catch {
+        prompt('Kopiera länken:', url);
+      }
+    }
+
+    function importFromHash() {
+      const match = location.hash.match(/^#dela=([A-Za-z0-9_-]+)$/);
+      if (!match) return;
+      window.history.replaceState(null, '', location.pathname + location.search);
+      const shared = decodeShare(match[1]);
+      if (!shared) {
+        alert('Delningslänken kunde inte läsas.');
+        return;
+      }
+      const text = shared.names.join('\n');
+      const existing = state.groups.find(g => g.name === shared.name && namesFromText(g.names).join('\n') === text);
+      if (existing) {
+        state.active = existing.id;
+      } else {
+        if (!confirm(`Lägg till gruppen "${shared.name}" med ${shared.names.length} namn?`)) return;
+        const group = { id: newId(), name: uniqueGroupName(shared.name), names: text, history: [] };
+        state.groups.push(group);
+        state.active = group.id;
+      }
+      saveGroups();
+    }
 
     textarea.addEventListener('input', function () {
-      localStorage.setItem('namepicker-names', this.value);
+      activeGroup().names = this.value;
+      saveGroups();
       autoResize();
       pickBtn.disabled = getNames().length === 0 || spinning;
       refreshStage();
     });
 
+    toggleNamesBtn.addEventListener('click', () => setNamesHidden(!namesHidden()));
+
+    document.getElementById('rename-group').addEventListener('click', renameGroup);
+    document.getElementById('delete-group').addEventListener('click', deleteGroup);
+    document.getElementById('share-group').addEventListener('click', shareGroup);
+    document.getElementById('export-history').addEventListener('click', exportHistory);
+    window.addEventListener('hashchange', () => {
+      if (spinning) return;
+      importFromHash();
+      showActiveGroup();
+    });
+
     modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     window.addEventListener('resize', () => { if (!spinning) refreshStage(); });
 
-    pickBtn.disabled = getNames().length === 0;
+    importFromHash();
     setMode(mode);
-
-    renderHistory();
+    showActiveGroup();
+    setNamesHidden(localStorage.getItem(NAMES_HIDDEN_KEY) === '1');
   </script>
+
 </body>
 </html>
