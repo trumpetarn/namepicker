@@ -591,6 +591,7 @@
       flex: 1;
     }
 
+    #history li .hist-mode,
     #history li .hist-date {
       font-size: 0.75rem;
       color: #555;
@@ -772,7 +773,7 @@
 
     let spinning = false;
 
-    // Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, date }] }] }
+    // Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, mode, date }] }] }
     const GROUPS_KEY = 'namepicker-groups';
     const MAX_HISTORY = 25;
 
@@ -828,6 +829,7 @@
       list.replaceChildren(...history.map((entry, i) => {
         const li = document.createElement('li');
         li.append(histSpan('rank', i + 1), histSpan('hist-name', entry.name));
+        if (MODE_NAMES[entry.mode]) li.append(histSpan('hist-mode', MODE_NAMES[entry.mode]));
         if (entry.date) li.append(histSpan('hist-date', formatHistDate(entry.date)));
         return li;
       }));
@@ -843,12 +845,13 @@
 
     function exportHistory() {
       const group = activeGroup();
-      const rows = [['Grupp', 'Namn', 'Datum', 'Tid']];
+      const rows = [['Grupp', 'Namn', 'Metod', 'Datum', 'Tid']];
       for (const entry of group.history) {
         const d = entry.date ? new Date(entry.date) : null;
         rows.push([
           group.name,
           entry.name,
+          MODE_NAMES[entry.mode] || '',
           d ? d.toLocaleDateString('sv-SE') : '',
           d ? d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' }) : '',
         ]);
@@ -864,9 +867,10 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    function addToHistory(name) {
+    // mode: which randomizer made the pick (missing on entries saved before it was recorded).
+    function addToHistory(name, mode) {
       const group = activeGroup();
-      group.history.unshift({ name, date: new Date().toISOString() });
+      group.history.unshift({ name, mode, date: new Date().toISOString() });
       group.history = group.history.slice(0, MAX_HISTORY);
       saveGroups();
       renderHistory();
@@ -874,6 +878,7 @@
 
     const MODE_KEY = 'namepicker-mode';
     const MODES = ['wheel', 'hat', 'slot'];
+    const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen' };
     const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken' };
     let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
 
@@ -1222,11 +1227,11 @@
 
     // --- Dragning ---
 
-    function land(winner) {
+    function land(winner, usedMode) {
       chosen.textContent = winner;
       chosen.className = 'landing visible';
       setSpinning(false);
-      addToHistory(winner);
+      addToHistory(winner, usedMode);
       launchConfetti();
       playFanfare();
     }
@@ -1238,7 +1243,8 @@
 
       const winnerIdx = Math.floor(Math.random() * names.length);
       const winner = names[winnerIdx];
-      const done = () => land(winner);
+      const usedMode = mode;
+      const done = () => land(winner, usedMode);
 
       setSpinning(true);
       chosen.className = '';
