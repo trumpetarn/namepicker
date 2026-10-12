@@ -29,13 +29,13 @@ function drawWheel(names) {
   if (names.length === 0) {
     ctx.beginPath();
     ctx.arc(c, c, r, 0, TAU);
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = themeColors.surface;
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = themeColors.border;
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.fillStyle = '#555';
-    ctx.font = '300 1rem system-ui, sans-serif';
+    ctx.fillStyle = themeColors.faint;
+    ctx.font = `300 16px ${themeColors.font}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Lägg till namn', c, c);
@@ -59,15 +59,15 @@ function drawWheel(names) {
     ctx.closePath();
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.strokeStyle = '#111';
+    ctx.strokeStyle = themeColors.bg;
     ctx.lineWidth = names.length > 40 ? 0.5 : 2;
     ctx.stroke();
 
     ctx.save();
     ctx.translate(c, c);
     ctx.rotate(start + seg / 2);
-    ctx.fillStyle = '#111';
-    ctx.font = `500 ${fontSize}px system-ui, sans-serif`;
+    ctx.fillStyle = '#111'; // dark text on the bright slices in every theme
+    ctx.font = `500 ${fontSize}px ${themeColors.font}`;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     ctx.fillText(fitText(ctx, name, r * 0.78), r - 12, 0);
@@ -76,9 +76,9 @@ function drawWheel(names) {
 
   ctx.beginPath();
   ctx.arc(c, c, r * 0.12, 0, TAU);
-  ctx.fillStyle = '#111';
+  ctx.fillStyle = themeColors.bg;
   ctx.fill();
-  ctx.strokeStyle = '#fff';
+  ctx.strokeStyle = themeColors.fg;
   ctx.lineWidth = 2;
   ctx.stroke();
 }

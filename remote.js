@@ -1,5 +1,6 @@
 // Fjärrkontrollen: the names stand still in a ring and a TV remote spins in the middle,
-// stopping with its tip pointing at the winner. Uses TAU, WHEEL_COLORS and fitText from wheel.js.
+// stopping with its tip pointing at the winner. Uses TAU, WHEEL_COLORS and fitText from wheel.js,
+// and themeColors from theme.js.
 
 const remoteCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('remote'));
 let remoteRot = 0; // radians, clockwise from pointing straight up
@@ -30,12 +31,12 @@ function drawRemote(names) {
   if (names.length === 0) {
     ctx.beginPath();
     ctx.arc(c, c, dotR, 0, TAU);
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = themeColors.border;
     ctx.lineWidth = 1;
     ctx.stroke();
     drawRemoteBody(ctx, c, remoteRot);
-    ctx.fillStyle = '#555';
-    ctx.font = '300 1rem system-ui, sans-serif';
+    ctx.fillStyle = themeColors.faint;
+    ctx.font = `300 16px ${themeColors.font}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Lägg till namn', c, c + c * 0.82);
@@ -67,13 +68,13 @@ function drawRemote(names) {
 
     ctx.beginPath();
     ctx.arc(c + Math.cos(phi) * dotR, c + Math.sin(phi) * dotR, hit ? 5 : 3, 0, TAU);
-    ctx.fillStyle = hit ? WHEEL_COLORS[i % WHEEL_COLORS.length] : '#444';
+    ctx.fillStyle = hit ? WHEEL_COLORS[i % WHEEL_COLORS.length] : themeColors.dim;
     ctx.fill();
 
     ctx.save();
     ctx.translate(c, c);
-    ctx.font = `${hit ? 500 : 300} ${fontSize}px system-ui, sans-serif`;
-    ctx.fillStyle = hit ? '#fff' : '#999';
+    ctx.font = `${hit ? 500 : 300} ${fontSize}px ${themeColors.font}`;
+    ctx.fillStyle = hit ? themeColors.fg : themeColors.muted;
     ctx.textBaseline = 'middle';
     const text = fitText(ctx, name, textOut - textIn);
     // Read outwards on the right half; flip on the left half so no name is upside down.
