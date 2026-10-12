@@ -2,6 +2,13 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
+  <script>
+    // Apply the saved colour mode before anything renders (theme.js handles switching).
+    try {
+      const t = localStorage.getItem('namepicker-theme');
+      if (['light', 'clown'].includes(t)) document.documentElement.dataset.theme = t;
+    } catch {}
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     /* Site menu: the same block is inlined on every page. */
@@ -67,7 +74,7 @@
   <title>Namnväljare – Jakob Markgren</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="namepicker.css?v=20261012.7">
+  <link rel="stylesheet" href="namepicker.css?v=20261012.9">
 </head>
 <body>
   <details class="site-menu">
@@ -96,6 +103,11 @@
     }
   </script>
   <canvas id="confetti-canvas"></canvas>
+  <div id="theme-switch" role="group" aria-label="Färgläge">
+    <button type="button" data-theme="dark">Mörkt</button>
+    <button type="button" data-theme="light">Ljust</button>
+    <button type="button" data-theme="clown">Clown</button>
+  </div>
   <div id="spotlight" hidden aria-hidden="true"><span id="spotlight-name"></span></div>
   <main>
     <h1>Namnväljare</h1>
@@ -106,7 +118,12 @@
         <button type="button" id="rename-group">Byt namn</button>
         <button type="button" id="delete-group">Ta bort</button>
         <button type="button" id="share-group">Dela</button>
+        <button type="button" id="method-settings-btn" aria-expanded="false" aria-controls="method-settings">Metoder</button>
       </div>
+      <fieldset id="method-settings" hidden>
+        <legend>Metoder i <span id="method-group-name"></span></legend>
+        <div id="method-list"></div>
+      </fieldset>
     </div>
     <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
     <div id="mode-switch" role="group" aria-label="Dragningsläge">
@@ -164,16 +181,17 @@
       <ol id="history-list"></ol>
     </div>
   </main>
-  <script src="random.js?v=20261012.7"></script>
-  <script src="effects.js?v=20261012.7"></script>
-  <script src="groups.js?v=20261012.7"></script>
-  <script src="history.js?v=20261012.7"></script>
-  <script src="share.js?v=20261012.7"></script>
-  <script src="wheel.js?v=20261012.7"></script>
-  <script src="hat.js?v=20261012.7"></script>
-  <script src="slot.js?v=20261012.7"></script>
-  <script src="remote.js?v=20261012.7"></script>
-  <script src="app.js?v=20261012.7"></script>
+  <script src="random.js?v=20261012.9"></script>
+  <script src="theme.js?v=20261012.9"></script>
+  <script src="effects.js?v=20261012.9"></script>
+  <script src="groups.js?v=20261012.9"></script>
+  <script src="history.js?v=20261012.9"></script>
+  <script src="share.js?v=20261012.9"></script>
+  <script src="wheel.js?v=20261012.9"></script>
+  <script src="hat.js?v=20261012.9"></script>
+  <script src="slot.js?v=20261012.9"></script>
+  <script src="remote.js?v=20261012.9"></script>
+  <script src="app.js?v=20261012.9"></script>
 
 </body>
 </html>

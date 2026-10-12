@@ -47,6 +47,7 @@ function setSpinning(on) {
   updatePickEnabled();
   modeBtns.forEach(b => b.disabled = on);
   updateGroupControls();
+  renderMethodSettings();
 }
 
 // --- Slumpa metod ---
@@ -55,26 +56,28 @@ function setSpinning(on) {
 // one, which then becomes the selected mode. The draw itself is still started by hand.
 function shuffleMode() {
   if (spinning) return;
-  const target = MODES[randomInt(MODES.length)];
-  const btns = MODES.map(m => document.querySelector(`#mode-switch button[data-mode="${m}"]`));
+  // Only the methods enabled for this group take part.
+  const modes = enabledModes();
+  const target = modes[randomInt(modes.length)];
+  const btns = modes.map(m => document.querySelector(`#mode-switch button[data-mode="${m}"]`));
   const stage = document.getElementById('stage');
-  const start = Math.floor(Math.random() * MODES.length);
+  const start = Math.floor(Math.random() * modes.length);
   // At least two full laps, ending on the target.
-  const steps = MODES.length * 2 + ((MODES.indexOf(target) - start + MODES.length) % MODES.length) + 1;
+  const steps = modes.length * 2 + ((modes.indexOf(target) - start + modes.length) % modes.length) + 1;
 
   setSpinning(true);
   stage.classList.add('shuffling');
   pickBtn.textContent = 'Slumpar metod…';
 
   function step(k) {
-    btns.forEach((b, i) => b.classList.toggle('shuffle-hit', i === (start + k) % MODES.length));
+    btns.forEach((b, i) => b.classList.toggle('shuffle-hit', i === (start + k) % modes.length));
     playTick(k === steps - 1 ? 1000 : 1400);
     if (k < steps - 1) {
       setTimeout(() => step(k + 1), 60 + 340 * Math.pow(k / steps, 3));
       return;
     }
     // Flash the chosen method, then switch to it.
-    btns[MODES.indexOf(target)].classList.add('shuffle-done');
+    btns[modes.indexOf(target)].classList.add('shuffle-done');
     setTimeout(() => {
       btns.forEach(b => b.classList.remove('shuffle-hit', 'shuffle-done'));
       stage.classList.remove('shuffling');
@@ -83,6 +86,64 @@ function shuffleMode() {
     }, 700);
   }
   step(0);
+}
+
+// --- Metoder per grupp ---
+
+// Each group can switch methods off (group.modes lists the enabled ones; without it, all
+// are on). Switched-off methods are hidden from the method row and skipped by Slumpa.
+const methodSettings = document.getElementById('method-settings');
+const methodSettingsBtn = document.getElementById('method-settings-btn');
+
+function enabledModes(group = activeGroup()) {
+  const modes = Array.isArray(group.modes) ? MODES.filter(m => group.modes.includes(m)) : MODES;
+  return modes.length ? modes : MODES;
+}
+
+function setModeEnabled(m, on) {
+  const group = activeGroup();
+  const modes = enabledModes(group).filter(x => x !== m);
+  if (on) modes.push(m);
+  if (!modes.length) return; // keep at least one
+  // Store only a real restriction, so groups with everything on follow new methods too.
+  if (MODES.every(x => modes.includes(x))) delete group.modes;
+  else group.modes = MODES.filter(x => modes.includes(x));
+  saveGroups();
+  applyEnabledModes();
+}
+
+// Shows the active group's methods in the method row and the settings, and moves off a
+// method the group has switched off.
+function applyEnabledModes() {
+  const modes = enabledModes();
+  modeBtns.forEach(b => { if (b.dataset.mode) b.hidden = !modes.includes(b.dataset.mode); });
+  document.getElementById('shuffle-mode').hidden = modes.length < 2;
+  if (!modes.includes(mode)) setMode(modes[0]);
+  renderMethodSettings();
+}
+
+function renderMethodSettings() {
+  const modes = enabledModes();
+  const list = document.getElementById('method-list');
+  list.replaceChildren();
+  for (const m of MODES) {
+    const label = document.createElement('label');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.checked = modes.includes(m);
+    // The last enabled method can't be switched off.
+    box.disabled = spinning || (box.checked && modes.length === 1);
+    box.addEventListener('change', () => setModeEnabled(m, box.checked));
+    label.append(box, MODE_NAMES[m]);
+    list.appendChild(label);
+  }
+  document.getElementById('method-group-name').textContent = activeGroup().name;
+}
+
+function toggleMethodSettings() {
+  const open = methodSettings.hidden;
+  methodSettings.hidden = !open;
+  methodSettingsBtn.setAttribute('aria-expanded', String(open));
 }
 
 // --- Dragning ---
@@ -176,6 +237,7 @@ toggleNamesBtn.addEventListener('click', () => setNamesHidden(!namesHidden()));
 document.getElementById('rename-group').addEventListener('click', renameGroup);
 document.getElementById('delete-group').addEventListener('click', deleteGroup);
 document.getElementById('share-group').addEventListener('click', shareGroup);
+methodSettingsBtn.addEventListener('click', toggleMethodSettings);
 document.getElementById('export-history').addEventListener('click', exportHistory);
 window.addEventListener('hashchange', () => {
   if (spinning) return;
