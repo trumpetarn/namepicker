@@ -623,6 +623,53 @@ main.can-pick #hat:hover {
   flex-shrink: 0;
 }
 
+#spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 90; /* under the confetti */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: spotlight-in 0.3s ease-out;
+  transition: opacity 0.3s;
+}
+
+#spotlight[hidden] {
+  display: none;
+}
+
+#spotlight.leaving {
+  opacity: 0;
+}
+
+#spotlight-name {
+  font-size: clamp(3rem, 12vw, 7rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: #fff;
+  text-shadow: 0 0 2rem rgba(255, 255, 255, 0.35);
+  animation: spotlight-pop 0.6s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+@keyframes spotlight-in {
+  from { opacity: 0; }
+}
+
+@keyframes spotlight-pop {
+  from { transform: scale(0.4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #spotlight-name { animation: none; }
+}
+
 #confetti-canvas {
   position: fixed;
   inset: 0;

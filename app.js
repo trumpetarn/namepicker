@@ -91,6 +91,7 @@ function land(winner, usedMode) {
   chosen.className = 'landing visible';
   setSpinning(false);
   addToHistory(winner, usedMode);
+  showSpotlight(winner);
   launchConfetti();
   playFanfare();
 }
@@ -106,6 +107,7 @@ function pickName(velocity) {
   const usedMode = mode;
   const done = () => land(winner, usedMode);
 
+  hideSpotlight();
   setSpinning(true);
   chosen.className = '';
 

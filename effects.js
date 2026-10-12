@@ -1,4 +1,4 @@
-// Confetti and Web Audio sound effects (ticks and the winner fanfare).
+// Confetti, the winner spotlight and Web Audio sound effects (ticks and the winner fanfare).
 
 function launchConfetti() {
   const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('confetti-canvas'));
@@ -45,6 +45,36 @@ function launchConfetti() {
 }
 
 let audioCtx = null;
+
+// The winner's name, big and centred over a dimmed page while the confetti falls.
+// It fades by itself, or on a click or key press. The name also stays in #result.
+const SPOTLIGHT_MS = 4000;
+let spotlightTimer = null;
+
+function showSpotlight(name) {
+  const el = document.getElementById('spotlight');
+  document.getElementById('spotlight-name').textContent = name;
+  clearTimeout(spotlightTimer);
+  el.classList.remove('leaving');
+  el.hidden = false;
+  spotlightTimer = setTimeout(hideSpotlight, SPOTLIGHT_MS);
+}
+
+function hideSpotlight() {
+  const el = document.getElementById('spotlight');
+  clearTimeout(spotlightTimer);
+  if (el.hidden || el.classList.contains('leaving')) return;
+  el.classList.add('leaving');
+  spotlightTimer = setTimeout(() => {
+    el.hidden = true;
+    el.classList.remove('leaving');
+  }, 300);
+}
+
+document.getElementById('spotlight').addEventListener('click', hideSpotlight);
+document.addEventListener('keydown', () => {
+  if (!document.getElementById('spotlight').hidden) hideSpotlight();
+});
 
 function getAudio() {
   const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
