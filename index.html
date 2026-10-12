@@ -3,10 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Namnväljare – Jakob Markgren</title>
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="namepicker.css?v=20261012.2">
   <style>
     /* Site menu: the same block is inlined on every page. */
     .site-menu {
@@ -68,6 +64,10 @@
       color: #fff;
     }
   </style>
+  <title>Namnväljare – Jakob Markgren</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="stylesheet" href="namepicker.css?v=20261012.2">
 </head>
 <body>
   <details class="site-menu">
@@ -80,6 +80,21 @@
       <li><a href="/weather/">Väder</a></li>
     </ul>
   </details>
+  <script>
+    // Close the site menu on a click outside it or on Escape.
+    {
+      const siteMenu = document.querySelector('.site-menu');
+      document.addEventListener('click', (e) => {
+        if (siteMenu.open && !siteMenu.contains(e.target)) siteMenu.open = false;
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && siteMenu.open) {
+          siteMenu.open = false;
+          siteMenu.querySelector('summary').focus();
+        }
+      });
+    }
+  </script>
   <canvas id="confetti-canvas"></canvas>
   <main>
     <h1>Namnväljare</h1>
@@ -152,20 +167,5 @@
   <script src="slot.js?v=20261012.2"></script>
   <script src="app.js?v=20261012.2"></script>
 
-  <script>
-    // Close the site menu on a click outside it or on Escape.
-    {
-      const siteMenu = document.querySelector('.site-menu');
-      document.addEventListener('click', (e) => {
-        if (siteMenu.open && !siteMenu.contains(e.target)) siteMenu.open = false;
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && siteMenu.open) {
-          siteMenu.open = false;
-          siteMenu.querySelector('summary').focus();
-        }
-      });
-    }
-  </script>
 </body>
 </html>
