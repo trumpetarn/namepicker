@@ -125,68 +125,83 @@ function spinWheel(names, winnerIdx, onDone, velocity) {
   requestAnimationFrame(frame);
 }
 
-// --- Dra i hjulet ---
+// --- Dra för att snurra (hjulet och fjärrkontrollen) ---
 
 const wheelCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('wheel'));
-const WHEEL_DRAG_MIN = 6;         // px of pointer travel before a press counts as a drag
-const WHEEL_FLICK_MIN = 0.004;    // rad/ms needed on release to start a spin
-const WHEEL_FLICK_WINDOW = 100;   // ms of recent movement used to measure the flick
-let wheelDrag = null;
-let wheelIgnoreClickUntil = 0;
+const SPIN_DRAG_MIN = 6;         // px of pointer travel before a press counts as a drag
+const SPIN_FLICK_MIN = 0.004;    // rad/ms needed on release to start a spin
+const SPIN_FLICK_WINDOW = 100;   // ms of recent movement used to measure the flick
+// A finished drag is followed by a click event; app.js ignores clicks until this time.
+let dragIgnoreClickUntil = 0;
 
-function wheelAngle(e) {
-  const rect = wheelCanvas.getBoundingClientRect();
-  return Math.atan2(e.clientY - rect.top - rect.height / 2, e.clientX - rect.left - rect.width / 2);
+// Lets the pointer turn a canvas's rotation by dragging around its centre, ticking as it
+// passes names, and starts a draw (pickName with the flick's velocity) when let go fast
+// enough. rot is in radians, clockwise; getRot/setRot read and write it, tickIndex says
+// which name a rotation is at (for the ticks), and draw redraws the canvas.
+function addSpinDrag(canvas, { getRot, setRot, tickIndex, draw }) {
+  let drag = null;
+
+  function angleOf(e) {
+    const rect = canvas.getBoundingClientRect();
+    return Math.atan2(e.clientY - rect.top - rect.height / 2, e.clientX - rect.left - rect.width / 2);
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    if (spinning || e.button !== 0 || getNames().length === 0) return;
+    canvas.setPointerCapture(e.pointerId);
+    drag = {
+      startX: e.clientX, startY: e.clientY, moved: false,
+      angle: angleOf(e), lastTick: null, samples: [{ rot: getRot(), t: e.timeStamp }],
+    };
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!drag || spinning) return;
+    if (!drag.moved && Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) < SPIN_DRAG_MIN) return;
+    drag.moved = true;
+    canvas.classList.add('dragging');
+    const angle = angleOf(e);
+    // Unwrap across the ±π seam so the rotation follows the pointer smoothly.
+    let d = angle - drag.angle;
+    if (d > Math.PI) d -= TAU;
+    else if (d < -Math.PI) d += TAU;
+    drag.angle = angle;
+    const rot = getRot() + d;
+    setRot(rot);
+
+    const names = getNames();
+    const tick = tickIndex(rot, names.length);
+    if (drag.lastTick !== null && tick !== drag.lastTick) playTick();
+    drag.lastTick = tick;
+    drag.samples.push({ rot, t: e.timeStamp });
+    while (drag.samples.length > 2 && e.timeStamp - drag.samples[0].t > SPIN_FLICK_WINDOW) drag.samples.shift();
+    draw(names);
+  });
+
+  function endDrag(e) {
+    if (!drag) return;
+    const { moved, samples } = drag;
+    drag = null;
+    canvas.classList.remove('dragging');
+    // A plain click (or tap) falls through to the click handler.
+    if (!moved) return;
+    dragIgnoreClickUntil = performance.now() + 500;
+    const first = samples[0];
+    const last = samples[samples.length - 1];
+    // Holding still before letting go means no flick.
+    const dt = e.timeStamp - first.t;
+    const velocity = dt > 0 && e.timeStamp - last.t < SPIN_FLICK_WINDOW ? (last.rot - first.rot) / dt : 0;
+    if (e.type === 'pointerup' && Math.abs(velocity) >= SPIN_FLICK_MIN) pickName(velocity);
+    else setRot(getRot() % TAU);
+  }
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
 }
 
-wheelCanvas.addEventListener('pointerdown', e => {
-  if (spinning || e.button !== 0 || getNames().length === 0) return;
-  wheelCanvas.setPointerCapture(e.pointerId);
-  const angle = wheelAngle(e);
-  wheelDrag = {
-    startX: e.clientX, startY: e.clientY, moved: false,
-    angle, lastSlice: null, samples: [{ rot: wheelRot, t: e.timeStamp }],
-  };
+addSpinDrag(wheelCanvas, {
+  getRot: () => wheelRot,
+  setRot: r => { wheelRot = r; },
+  tickIndex: (rot, count) => Math.floor(rot / (TAU / count)),
+  draw: drawWheel,
 });
-
-wheelCanvas.addEventListener('pointermove', e => {
-  if (!wheelDrag || spinning) return;
-  if (!wheelDrag.moved && Math.hypot(e.clientX - wheelDrag.startX, e.clientY - wheelDrag.startY) < WHEEL_DRAG_MIN) return;
-  wheelDrag.moved = true;
-  wheelCanvas.classList.add('dragging');
-  const angle = wheelAngle(e);
-  // Unwrap across the ±π seam so the wheel follows the pointer smoothly.
-  let d = angle - wheelDrag.angle;
-  if (d > Math.PI) d -= TAU;
-  else if (d < -Math.PI) d += TAU;
-  wheelDrag.angle = angle;
-  wheelRot += d;
-
-  const names = getNames();
-  const slice = Math.floor(wheelRot / (TAU / names.length));
-  if (wheelDrag.lastSlice !== null && slice !== wheelDrag.lastSlice) playTick();
-  wheelDrag.lastSlice = slice;
-  wheelDrag.samples.push({ rot: wheelRot, t: e.timeStamp });
-  while (wheelDrag.samples.length > 2 && e.timeStamp - wheelDrag.samples[0].t > WHEEL_FLICK_WINDOW) wheelDrag.samples.shift();
-  drawWheel(names);
-});
-
-function endWheelDrag(e) {
-  if (!wheelDrag) return;
-  const { moved, samples } = wheelDrag;
-  wheelDrag = null;
-  wheelCanvas.classList.remove('dragging');
-  // A plain click (or tap) falls through to the click handler.
-  if (!moved) return;
-  wheelIgnoreClickUntil = performance.now() + 500;
-  const first = samples[0];
-  const last = samples[samples.length - 1];
-  // Holding still before letting go means no flick.
-  const dt = e.timeStamp - first.t;
-  const velocity = dt > 0 && e.timeStamp - last.t < WHEEL_FLICK_WINDOW ? (last.rot - first.rot) / dt : 0;
-  if (e.type === 'pointerup' && Math.abs(velocity) >= WHEEL_FLICK_MIN) pickName(velocity);
-  else wheelRot %= TAU;
-}
-
-wheelCanvas.addEventListener('pointerup', endWheelDrag);
-wheelCanvas.addEventListener('pointercancel', endWheelDrag);

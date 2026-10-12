@@ -153,16 +153,26 @@ function drawRemoteBody(ctx, c, angle) {
   ctx.restore();
 }
 
-function spinRemote(names, winnerIdx, onDone) {
+// velocity: optional flick speed in rad/ms (negative = anticlockwise) from dragging the
+// remote. Like the wheel's flick, it sets the direction, turns and starting speed, but
+// the winner is still chosen up front and steered to.
+function spinRemote(names, winnerIdx, onDone, velocity) {
   const seg = TAU / names.length;
   // Point somewhere around the winner's marker, never closer to a neighbour.
   const jitter = (Math.random() - 0.5) * seg * 0.6;
   const desired = winnerIdx * seg + jitter;
   const startRot = remoteRot;
-  const delta = (((desired - startRot) % TAU) + TAU) % TAU;
-  const turns = 4 + Math.floor(Math.random() * 3);
-  const duration = 6000 + Math.random() * 1500;
-  const target = startRot + delta + TAU * turns;
+  const dir = velocity < 0 ? -1 : 1;
+  const delta = ((((desired - startRot) * dir) % TAU) + TAU) % TAU;
+  let turns = 4 + Math.floor(Math.random() * 3);
+  let duration = 6000 + Math.random() * 1500;
+  if (velocity) {
+    const speed = Math.abs(velocity);
+    turns = Math.min(8, Math.max(2, Math.round(1 + speed * 200)));
+    // The cubic ease-out starts at 3 × distance / duration; match the flick where we can.
+    duration = Math.min(9000, Math.max(3500, 3 * (delta + TAU * turns) / speed));
+  }
+  const target = startRot + dir * (delta + TAU * turns);
   const t0 = performance.now();
   let lastTarget = remoteTarget(startRot, names.length);
 
@@ -184,3 +194,10 @@ function spinRemote(names, winnerIdx, onDone) {
   }
   requestAnimationFrame(frame);
 }
+
+addSpinDrag(remoteCanvas, {
+  getRot: () => remoteRot,
+  setRot: r => { remoteRot = r; },
+  tickIndex: remoteTarget,
+  draw: drawRemote,
+});

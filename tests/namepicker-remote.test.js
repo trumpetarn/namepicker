@@ -8,19 +8,26 @@ import { loadScripts } from './load-scripts.js';
 function loadRemote() {
   let now = 0;
   let ticks = 0;
+  // remoteRot as each animation frame is requested. The fake requestAnimationFrame runs
+  // the next frame from inside the current one, so record before calling back.
+  const frames = [];
   const canvas = { clientWidth: 0, addEventListener() {} };
   const ctx = loadScripts(['namepicker/wheel.js', 'namepicker/remote.js'], {
     document: { getElementById: () => canvas },
     performance: { now: () => now },
-    requestAnimationFrame: cb => { now += 16; cb(now); },
+    requestAnimationFrame: cb => {
+      frames.push(vm.runInContext('remoteRot', ctx));
+      now += 16;
+      cb(now);
+    },
     playTick: () => { ticks++; },
   });
-  return { ctx, ticks: () => ticks };
+  return { ctx, ticks: () => ticks, frames };
 }
 
-function spin(ctx, names, winnerIdx) {
+function spin(ctx, names, winnerIdx, velocity) {
   let finished = false;
-  ctx.spinRemote(names, winnerIdx, () => { finished = true; });
+  ctx.spinRemote(names, winnerIdx, () => { finished = true; }, velocity);
   assert.ok(finished, 'spin should finish');
   // remoteRot is a top-level let, not a property of the global object.
   return ctx.remoteTarget(vm.runInContext('remoteRot', ctx), names.length);
@@ -54,4 +61,22 @@ test('a spin ticks as the remote passes the names', () => {
   spin(ctx, ['A', 'B', 'C', 'D', 'E'], 2);
   // At least four full turns past five names.
   assert.ok(ticks() >= 20, `only ${ticks()} ticks`);
+});
+
+
+test('a flicked spin turns the way it was flicked and still stops on the winner', () => {
+  for (const velocity of [0.005, 0.03, -0.005, -0.03]) {
+    const { ctx, frames } = loadRemote();
+    const names = Array.from({ length: 9 }, (_, i) => `Namn ${i}`);
+    for (let round = 0; round < 10; round++) {
+      const winner = (round * 4 + 1) % names.length;
+      const start = vm.runInContext('remoteRot', ctx);
+      frames.length = 0;
+      assert.equal(spin(ctx, names, winner, velocity), winner, `velocity ${velocity}, round ${round}`);
+      // The last recorded value is from just before the final wrap into one turn.
+      const turned = frames[frames.length - 1] - start;
+      assert.ok(Math.sign(turned) === Math.sign(velocity), `velocity ${velocity} turned ${turned}`);
+      assert.ok(Math.abs(turned) > Math.PI * 2, 'more than one full turn');
+    }
+  }
 });
