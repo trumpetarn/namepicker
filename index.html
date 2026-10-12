@@ -3,12 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Site menu: the same block is inlined on every page. */
+    .site-menu {
+      position: absolute;
+      top: 0.6rem;
+      left: 1rem;
+      z-index: 50;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 300;
+    }
+
+    .site-menu summary {
+      list-style: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+
+    .site-menu summary::-webkit-details-marker { display: none; }
+
+    .site-menu summary::after {
+      content: " +";
+    }
+
+    .site-menu[open] summary::after {
+      content: " \2212";
+    }
+
+    .site-menu summary:hover,
+    .site-menu[open] summary {
+      color: #fff;
+    }
+
+    .site-menu ul {
+      list-style: none;
+      margin: 0.5rem 0 0 -0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: #111;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .site-menu a {
+      color: #999;
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+
+    .site-menu a:hover,
+    .site-menu a[aria-current="page"] {
+      color: #fff;
+    }
+  </style>
   <title>Namnväljare – Jakob Markgren</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="namepicker.css?v=20261012.3">
 </head>
 <body>
+  <details class="site-menu">
+    <summary>Meny</summary>
+    <ul>
+      <li><a href="/">Start</a></li>
+      <li><a href="/namepicker/" aria-current="page">Namnväljare</a></li>
+      <li><a href="/dashboard/">Dashboard</a></li>
+      <li><a href="/clock/">Klocka</a></li>
+      <li><a href="/weather/">Väder</a></li>
+    </ul>
+  </details>
+  <script>
+    // Close the site menu on a click outside it or on Escape.
+    {
+      const siteMenu = document.querySelector('.site-menu');
+      document.addEventListener('click', (e) => {
+        if (siteMenu.open && !siteMenu.contains(e.target)) siteMenu.open = false;
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && siteMenu.open) {
+          siteMenu.open = false;
+          siteMenu.querySelector('summary').focus();
+        }
+      });
+    }
+  </script>
   <canvas id="confetti-canvas"></canvas>
   <main>
     <h1>Namnväljare</h1>
