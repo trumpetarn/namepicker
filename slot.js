@@ -42,9 +42,15 @@ function spinSlot(names, winnerIdx, onDone) {
 
   const startY = reelOffset(REEL_PAD);
   const endY = reelOffset(REEL_PAD + distance);
-  const overshootY = endY - ROW_H * 0.35;
+  // Two endings, picked at random (only the animation; the winner is already decided):
+  // the reel creeps a little past the winner towards the next name and falls back, or it
+  // slows to a stop while the previous name is still in the frame, hesitates, and then
+  // clicks on to the winner.
+  const goesLong = Math.random() < 0.5;
+  const stopY = goesLong ? endY - ROW_H * 0.35 : endY + ROW_H * 0.6;
   const runTime = 6500;
-  const settleTime = 350;
+  const settleTime = goesLong ? 350 : 650;
+  const hesitate = goesLong ? 0 : 0.35; // share of the settle spent standing still
   const t0 = performance.now();
   let lastY = startY;
   let lastRow = REEL_PAD;
@@ -54,10 +60,10 @@ function spinSlot(names, winnerIdx, onDone) {
     let y;
     if (t < runTime) {
       const p = t / runTime;
-      y = startY + (overshootY - startY) * (1 - Math.pow(1 - p, 3));
+      y = startY + (stopY - startY) * (1 - Math.pow(1 - p, 3));
     } else {
-      const p = Math.min(1, (t - runTime) / settleTime);
-      y = overshootY + (endY - overshootY) * (0.5 - Math.cos(Math.PI * p) / 2);
+      const p = Math.max(0, (Math.min(1, (t - runTime) / settleTime) - hesitate) / (1 - hesitate));
+      y = stopY + (endY - stopY) * (0.5 - Math.cos(Math.PI * p) / 2);
     }
     reel.style.transform = `translateY(${y}px)`;
     reel.style.filter = `blur(${Math.min(4, Math.abs(y - lastY) / 12)}px)`;
