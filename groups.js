@@ -1,6 +1,7 @@
 // Named groups: localStorage state, tabs, and add/rename/delete.
 
-// Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, mode, date }] }] }
+// Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, mode, date }],
+//           modes?: [enabled methods; all when missing] }] }
 const GROUPS_KEY = 'namepicker-groups';
 
 function newId() {
@@ -80,6 +81,7 @@ function showActiveGroup() {
   updateToggleLabel();
   renderTabs();
   renderHistory();
+  applyEnabledModes();
   refreshStage();
 }
 
