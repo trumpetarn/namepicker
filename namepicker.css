@@ -1,9 +1,68 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Färglägen: set as data-theme on <html> (by an inline script in <head>, so the page
+   never flashes the wrong one) and switched by theme.js. The wheel and the remote read
+   these variables too. Objects like the hat's slips and the lever keep their colours. */
+:root {
+  color-scheme: dark;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bg: #111;
+  --fg: #fff;
+  --surface: #1a1a1a;     /* text area, hover, reel window */
+  --border: #333;
+  --muted: #888;          /* inactive tabs and methods */
+  --subtle: #666;         /* secondary actions */
+  --faint: #555;          /* placeholders, headings, history details */
+  --dim: #444;            /* disabled text */
+  --text-soft: #aaa;      /* history names */
+  --accent-bg: #fff;      /* main button, selected method */
+  --accent-fg: #111;
+  --accent-hover: #ddd;
+  --spotlight-bg: rgba(17, 17, 17, 0.85);
+  --spotlight-glow: rgba(255, 255, 255, 0.35);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f6f4;
+  --fg: #111;
+  --surface: #fff;
+  --border: #d4d4d0;
+  --muted: #6b6b6b;
+  --subtle: #777;
+  --faint: #8f8f8f;
+  --dim: #bdbdb8;
+  --text-soft: #444;
+  --accent-bg: #111;
+  --accent-fg: #fff;
+  --accent-hover: #333;
+  --spotlight-bg: rgba(246, 246, 244, 0.88);
+  --spotlight-glow: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="clown"] {
+  color-scheme: light;
+  --font: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", cursive;
+  --bg: #fff6d5;
+  --fg: #1d1a5e;
+  --surface: #fff;
+  --border: #f4a7b9;
+  --muted: #7b4fa0;
+  --subtle: #d81b60;
+  --faint: #a1887f;
+  --dim: #d7c9a0;
+  --text-soft: #1d1a5e;
+  --accent-bg: #e53935;
+  --accent-fg: #fff;
+  --accent-hover: #ff7043;
+  --spotlight-bg: rgba(255, 246, 213, 0.9);
+  --spotlight-glow: rgba(229, 57, 53, 0.35);
+}
+
 body {
-  background: #111;
-  color: #fff;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,9 +88,9 @@ h1 {
 textarea {
   width: 100%;
   min-height: 180px;
-  background: #1a1a1a;
-  color: #fff;
-  border: 1px solid #333;
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.75rem 1rem;
   font-family: inherit;
@@ -43,16 +102,16 @@ textarea {
 }
 
 textarea::placeholder {
-  color: #555;
+  color: var(--faint);
 }
 
 textarea:focus {
-  border-color: #666;
+  border-color: var(--subtle);
 }
 
 button {
-  background: #fff;
-  color: #111;
+  background: var(--accent-bg);
+  color: var(--accent-fg);
   border: none;
   border-radius: 6px;
   padding: 0.75rem 1.5rem;
@@ -66,12 +125,12 @@ button {
 }
 
 button:hover {
-  background: #ddd;
+  background: var(--accent-hover);
 }
 
 button:disabled {
-  background: #333;
-  color: #666;
+  background: var(--border);
+  color: var(--subtle);
   cursor: default;
 }
 
@@ -88,7 +147,7 @@ button:disabled {
   font-size: 2.5rem;
   font-weight: 300;
   letter-spacing: 0.06em;
-  color: #fff;
+  color: var(--fg);
   opacity: 0;
   transition: opacity 0.25s;
 }
@@ -99,7 +158,7 @@ button:disabled {
 
 #result span.landing {
   opacity: 1;
-  color: #fff;
+  color: var(--fg);
 }
 
 #group-bar {
@@ -112,7 +171,7 @@ button:disabled {
   display: flex;
   gap: 0.25rem;
   overflow-x: auto;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 }
 
@@ -125,7 +184,7 @@ button:disabled {
   max-width: 12rem;
   margin-bottom: -1px;
   background: transparent;
-  color: #888;
+  color: var(--muted);
   border-bottom: 2px solid transparent;
   border-radius: 6px 6px 0 0;
   padding: 0.6rem 0.9rem;
@@ -137,13 +196,13 @@ button:disabled {
 }
 
 .group-tab:hover {
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--surface);
+  color: var(--fg);
 }
 
 .group-tab[aria-selected="true"] {
-  color: #fff;
-  border-bottom-color: #fff;
+  color: var(--fg);
+  border-bottom-color: var(--fg);
 }
 
 .group-tab.group-add {
@@ -153,12 +212,12 @@ button:disabled {
 
 .group-tab:disabled {
   background: transparent;
-  color: #444;
+  color: var(--dim);
 }
 
 .group-tab[aria-selected="true"]:disabled {
-  color: #888;
-  border-bottom-color: #888;
+  color: var(--muted);
+  border-bottom-color: var(--muted);
 }
 
 #group-actions {
@@ -169,14 +228,14 @@ button:disabled {
 
 #group-actions button {
   background: none;
-  color: #666;
+  color: var(--subtle);
   padding: 0;
   font-size: 0.7rem;
   font-weight: 400;
 }
 
 #group-actions button:hover {
-  color: #fff;
+  color: var(--fg);
 }
 
 #group-actions #toggle-names {
@@ -203,12 +262,12 @@ main.names-hidden #hat-scene {
 
 #group-actions button:disabled {
   background: none;
-  color: #333;
+  color: var(--border);
 }
 
 #mode-switch {
   display: flex;
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -216,7 +275,7 @@ main.names-hidden #hat-scene {
 #mode-switch button {
   flex: 1;
   background: transparent;
-  color: #888;
+  color: var(--muted);
   border-radius: 0;
   padding: 0.6rem 0.5rem;
   font-size: 0.75rem;
@@ -224,7 +283,7 @@ main.names-hidden #hat-scene {
 }
 
 #mode-switch button + button {
-  border-left: 1px solid #333;
+  border-left: 1px solid var(--border);
 }
 
 /* Kort etikett, så ge metoderna mer plats */
@@ -233,30 +292,30 @@ main.names-hidden #hat-scene {
 }
 
 #mode-switch button:hover {
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--surface);
+  color: var(--fg);
 }
 
 #mode-switch button[aria-pressed="true"] {
-  background: #fff;
-  color: #111;
+  background: var(--accent-bg);
+  color: var(--accent-fg);
 }
 
 #mode-switch button:disabled {
   background: transparent;
-  color: #444;
+  color: var(--dim);
 }
 
 #mode-switch button[aria-pressed="true"]:disabled {
-  background: #333;
-  color: #888;
+  background: var(--border);
+  color: var(--muted);
 }
 
 /* Slumpa: markeringen hoppar mellan metoderna innan dragningen */
 #mode-switch button.shuffle-hit,
 #mode-switch button.shuffle-hit:disabled {
-  background: #fff;
-  color: #111;
+  background: var(--accent-bg);
+  color: var(--accent-fg);
 }
 
 #mode-switch button.shuffle-done {
@@ -319,7 +378,7 @@ main.can-pick #remote.dragging {
   transform: translateX(-50%);
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-top: 24px solid #fff;
+  border-top: 24px solid var(--fg);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6));
   z-index: 1;
 }
@@ -471,7 +530,7 @@ main.can-pick #hat:hover {
 #reel-window {
   height: 224px;
   overflow: hidden;
-  background: #1a1a1a;
+  background: var(--surface);
   border-radius: 6px;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
@@ -488,14 +547,14 @@ main.can-pick #hat:hover {
   text-align: center;
   font-size: 1.6rem;
   font-weight: 300;
-  color: #888;
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .reel-item.win {
-  color: #fff;
+  color: var(--fg);
 }
 
 #reel-frame {
@@ -504,8 +563,8 @@ main.can-pick #hat:hover {
   right: 0;
   top: 84px;
   height: 56px;
-  border-top: 1px solid #555;
-  border-bottom: 1px solid #555;
+  border-top: 1px solid var(--faint);
+  border-bottom: 1px solid var(--faint);
   pointer-events: none;
 }
 
@@ -586,7 +645,7 @@ main.can-pick #hat:hover {
 
 #export-history {
   background: none;
-  color: #666;
+  color: var(--subtle);
   padding: 0;
   font-size: 0.7rem;
   font-weight: 400;
@@ -594,7 +653,7 @@ main.can-pick #hat:hover {
 
 #export-history:hover {
   background: none;
-  color: #fff;
+  color: var(--fg);
 }
 
 #history h2 {
@@ -602,7 +661,7 @@ main.can-pick #hat:hover {
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #555;
+  color: var(--faint);
 }
 
 #history ol {
@@ -618,12 +677,12 @@ main.can-pick #hat:hover {
   gap: 0.75rem;
   font-size: 0.95rem;
   font-weight: 300;
-  color: #aaa;
+  color: var(--text-soft);
 }
 
 #history li .rank {
   font-size: 0.7rem;
-  color: #444;
+  color: var(--dim);
   width: 1rem;
   text-align: right;
   flex-shrink: 0;
@@ -636,7 +695,7 @@ main.can-pick #hat:hover {
 #history li .hist-mode,
 #history li .hist-date {
   font-size: 0.75rem;
-  color: #555;
+  color: var(--faint);
   flex-shrink: 0;
 }
 
@@ -648,7 +707,7 @@ main.can-pick #hat:hover {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: rgba(17, 17, 17, 0.85);
+  background: var(--spotlight-bg);
   backdrop-filter: blur(4px);
   cursor: pointer;
   animation: spotlight-in 0.3s ease-out;
@@ -670,8 +729,8 @@ main.can-pick #hat:hover {
   line-height: 1.1;
   text-align: center;
   overflow-wrap: anywhere;
-  color: #fff;
-  text-shadow: 0 0 2rem rgba(255, 255, 255, 0.35);
+  color: var(--fg);
+  text-shadow: 0 0 2rem var(--spotlight-glow);
   animation: spotlight-pop 0.6s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
 
@@ -694,4 +753,114 @@ main.can-pick #hat:hover {
   height: 100%;
   pointer-events: none;
   z-index: 100;
+}
+
+/* Färglägesväljaren, uppe till höger (sajtmenyn sitter uppe till vänster) */
+#theme-switch {
+  position: absolute;
+  top: 0.45rem;
+  right: 1rem;
+  z-index: 50;
+  display: flex;
+  gap: 0.15rem;
+}
+
+#theme-switch button {
+  background: none;
+  color: var(--muted);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+#theme-switch button:hover {
+  background: none;
+  color: var(--fg);
+}
+
+#theme-switch button[aria-pressed="true"] {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+/* Sajtmenyn är samma på alla sidor; här följer den färgläget */
+.site-menu summary,
+.site-menu a {
+  color: var(--muted);
+}
+
+.site-menu summary:hover,
+.site-menu[open] summary,
+.site-menu a:hover,
+.site-menu a[aria-current="page"] {
+  color: var(--fg);
+}
+
+.site-menu ul {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+/* Clownläge: prickar, regnbåge och lite gung */
+:root[data-theme="clown"] body {
+  background-image:
+    radial-gradient(rgba(229, 57, 53, 0.22) 14%, transparent 15%),
+    radial-gradient(rgba(41, 121, 255, 0.2) 14%, transparent 15%),
+    radial-gradient(rgba(67, 160, 71, 0.2) 14%, transparent 15%);
+  background-size: 72px 72px;
+  background-position: 0 0, 24px 24px, 48px 48px;
+  background-attachment: fixed;
+}
+
+:root[data-theme="clown"] main {
+  background: rgba(255, 246, 213, 0.92);
+  border: 3px dashed #e53935;
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+:root[data-theme="clown"] h1,
+:root[data-theme="clown"] #spotlight-name {
+  background: linear-gradient(90deg, #e53935, #fb8c00, #fdd835, #43a047, #1e88e5, #8e24aa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+:root[data-theme="clown"] h1 {
+  font-weight: 700;
+  animation: clown-wobble 2.4s ease-in-out infinite;
+}
+
+:root[data-theme="clown"] #spotlight-name {
+  font-weight: 700;
+}
+
+:root[data-theme="clown"] #pick-btn {
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 #8e1b18;
+}
+
+:root[data-theme="clown"] #pick-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #8e1b18;
+}
+
+:root[data-theme="clown"] #result span {
+  color: #e53935;
+  font-weight: 700;
+}
+
+@keyframes clown-wobble {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg) scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="clown"] h1 { animation: none; }
 }

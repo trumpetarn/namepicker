@@ -104,14 +104,15 @@ function playFanfare() {
   const actx = getAudio();
   if (!actx) return;
 
-  function note(freq, startOffset, duration, vol = 0.28) {
+  function note(freq, startOffset, duration, vol = 0.28, type = 'triangle', bendTo = freq) {
     const osc = actx.createOscillator();
     const gain = actx.createGain();
     osc.connect(gain);
     gain.connect(actx.destination);
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
+    osc.type = type;
     const t = actx.currentTime + startOffset;
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.exponentialRampToValueAtTime(bendTo, t + duration);
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(vol, t + 0.02);
     gain.gain.linearRampToValueAtTime(0, t + duration);
@@ -127,4 +128,10 @@ function playFanfare() {
   note(659.25, 0.36, 0.55, 0.18);   // E5 chord
   note(783.99, 0.36, 0.55, 0.18);   // G5 chord
   note(1046.50, 0.36, 0.55, 0.18);  // C6 chord
+
+  // Clownläge: tut-tut på en cykeltuta efter fanfaren.
+  if (currentTheme() === 'clown') {
+    note(420, 1.0, 0.16, 0.12, 'sawtooth', 300);
+    note(420, 1.22, 0.24, 0.12, 'sawtooth', 280);
+  }
 }
