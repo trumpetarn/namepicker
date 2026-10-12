@@ -1,6 +1,8 @@
 // The active group's pick history and its CSV export.
 
 const MAX_HISTORY = 25;
+// The list can be collapsed to just its heading; one setting for all groups.
+const HISTORY_HIDDEN_KEY = 'namepicker-history-hidden';
 
 function formatHistDate(iso) {
   if (!iso) return '';
@@ -20,6 +22,11 @@ function renderHistory() {
   const list = document.getElementById('history-list');
   if (history.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'flex';
+  const hidden = localStorage.getItem(HISTORY_HIDDEN_KEY) === '1';
+  const toggle = document.getElementById('toggle-history');
+  toggle.textContent = hidden ? `Historik (${history.length})` : 'Historik';
+  toggle.setAttribute('aria-expanded', String(!hidden));
+  list.hidden = hidden;
   // Built with textContent: names can come from someone else's share link.
   list.replaceChildren(...history.map((entry, i) => {
     const li = document.createElement('li');
@@ -28,6 +35,12 @@ function renderHistory() {
     if (entry.date) li.append(histSpan('hist-date', formatHistDate(entry.date)));
     return li;
   }));
+}
+
+function toggleHistory() {
+  const hidden = localStorage.getItem(HISTORY_HIDDEN_KEY) === '1';
+  localStorage.setItem(HISTORY_HIDDEN_KEY, hidden ? '0' : '1');
+  renderHistory();
 }
 
 // Semicolon-separated with a UTF-8 BOM so Swedish Excel opens it with columns and åäö intact.

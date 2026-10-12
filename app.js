@@ -239,6 +239,7 @@ document.getElementById('delete-group').addEventListener('click', deleteGroup);
 document.getElementById('share-group').addEventListener('click', shareGroup);
 methodSettingsBtn.addEventListener('click', toggleMethodSettings);
 document.getElementById('export-history').addEventListener('click', exportHistory);
+document.getElementById('toggle-history').addEventListener('click', toggleHistory);
 window.addEventListener('hashchange', () => {
   if (spinning) return;
   importFromHash();

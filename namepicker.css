@@ -709,9 +709,31 @@ main.can-pick #hat:hover {
 #history h2 {
   font-size: 0.75rem;
   font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+}
+
+/* Rubriken fäller ihop och ut historiken */
+#toggle-history {
+  background: none;
   color: var(--faint);
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: 0.1em;
+  transition: color 0.15s;
+}
+
+#toggle-history::after {
+  content: " \2212";
+}
+
+#toggle-history[aria-expanded="false"]::after {
+  content: " +";
+}
+
+#toggle-history:hover {
+  background: none;
+  color: var(--fg);
 }
 
 #history ol {
@@ -719,6 +741,10 @@ main.can-pick #hat:hover {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+#history ol[hidden] {
+  display: none;
 }
 
 #history li {
