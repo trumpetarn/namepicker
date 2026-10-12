@@ -3,9 +3,9 @@
 let spinning = false;
 
 const MODE_KEY = 'namepicker-mode';
-const MODES = ['wheel', 'hat', 'slot'];
-const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen' };
-const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken' };
+const MODES = ['wheel', 'hat', 'slot', 'remote'];
+const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen', remote: 'Fjärrkontrollen' };
+const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken', remote: 'Snurra fjärren' };
 let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
 
 const pickBtn = /** @type {HTMLButtonElement} */ (document.getElementById('pick-btn'));
@@ -31,9 +31,10 @@ function refreshStage() {
   const names = getNames();
   if (mode === 'wheel') drawWheel(names);
   else if (mode === 'slot') showIdleReel(names);
+  else if (mode === 'remote') drawRemote(names);
 }
 
-// The button, the wheel, the hat and the lever all start a draw.
+// The button, the wheel, the hat, the remote and the lever all start a draw.
 function updatePickEnabled() {
   const disabled = spinning || getNames().length === 0;
   pickBtn.disabled = disabled;
@@ -96,7 +97,7 @@ function land(winner, usedMode) {
   playFanfare();
 }
 
-// velocity: optional flick speed from dragging the wheel.
+// velocity: optional flick speed from dragging the wheel or the remote.
 function pickName(velocity) {
   if (spinning) return;
   const names = getNames();
@@ -113,17 +114,18 @@ function pickName(velocity) {
 
   if (mode === 'wheel') spinWheel(names, winnerIdx, done, velocity);
   else if (mode === 'hat') drawFromHat(names, winner, done);
+  else if (mode === 'remote') spinRemote(names, winnerIdx, done, velocity);
   else {
     swingLever();
     spinSlot(names, winnerIdx, done);
   }
 }
 
-// Click (or Enter/Space) on the wheel or the hat instead of the button.
-for (const el of [document.getElementById('wheel'), document.getElementById('hat')]) {
+// Click (or Enter/Space) on the wheel, the hat or the remote instead of the button.
+for (const el of [document.getElementById('wheel'), document.getElementById('hat'), remoteCanvas]) {
   el.addEventListener('click', () => {
-    // A finished wheel drag already handled itself; ignore the click that follows it.
-    if (performance.now() < wheelIgnoreClickUntil) return;
+    // A finished drag of the wheel or the remote already handled itself; ignore the click that follows it.
+    if (performance.now() < dragIgnoreClickUntil) return;
     pickName();
   });
   el.addEventListener('keydown', e => {
