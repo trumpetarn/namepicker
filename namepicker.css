@@ -1,0 +1,599 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #111;
+  color: #fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 2rem;
+}
+
+main {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
+  min-height: 180px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 300;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+textarea::placeholder {
+  color: #555;
+}
+
+textarea:focus {
+  border-color: #666;
+}
+
+button {
+  background: #fff;
+  color: #111;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #ddd;
+}
+
+button:disabled {
+  background: #333;
+  color: #666;
+  cursor: default;
+}
+
+#result {
+  text-align: center;
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#result span {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+#result span.visible {
+  opacity: 1;
+}
+
+#result span.landing {
+  opacity: 1;
+  color: #fff;
+}
+
+#group-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#group-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid #333;
+  scrollbar-width: none;
+}
+
+#group-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.group-tab {
+  flex-shrink: 0;
+  max-width: 12rem;
+  margin-bottom: -1px;
+  background: transparent;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-tab:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.group-tab[aria-selected="true"] {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+.group-tab.group-add {
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.group-tab:disabled {
+  background: transparent;
+  color: #444;
+}
+
+.group-tab[aria-selected="true"]:disabled {
+  color: #888;
+  border-bottom-color: #888;
+}
+
+#group-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+#group-actions button {
+  background: none;
+  color: #666;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+#group-actions button:hover {
+  color: #fff;
+}
+
+#group-actions #toggle-names {
+  margin-right: auto;
+}
+
+/* Namnlistan dold: ge hjulet och hatten mer plats */
+main.names-hidden #names {
+  display: none;
+}
+
+main.names-hidden #wheel-wrap {
+  width: 100%;
+}
+
+main.names-hidden #hat-stage.active {
+  height: 360px;
+}
+
+main.names-hidden #hat-scene {
+  transform: scale(1.5);
+}
+
+#group-actions button:disabled {
+  background: none;
+  color: #333;
+}
+
+#mode-switch {
+  display: flex;
+  border: 1px solid #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#mode-switch button {
+  flex: 1;
+  background: transparent;
+  color: #888;
+  border-radius: 0;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+#mode-switch button + button {
+  border-left: 1px solid #333;
+}
+
+#mode-switch button:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+#mode-switch button[aria-pressed="true"] {
+  background: #fff;
+  color: #111;
+}
+
+#mode-switch button:disabled {
+  background: transparent;
+  color: #444;
+}
+
+#mode-switch button[aria-pressed="true"]:disabled {
+  background: #333;
+  color: #888;
+}
+
+.stage-panel {
+  display: none;
+  position: relative;
+  justify-content: center;
+}
+
+.stage-panel.active {
+  display: flex;
+}
+
+/* Lyckohjul */
+#wheel-wrap {
+  position: relative;
+  width: min(320px, 100%);
+  aspect-ratio: 1;
+}
+
+#wheel {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hjulet, hatten och spaken går att klicka på som alternativ till knappen */
+main.can-pick #wheel,
+main.can-pick #hat {
+  cursor: pointer;
+}
+
+#wheel-pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 24px solid #fff;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.6));
+  z-index: 1;
+}
+
+/* Hatten */
+#hat-stage.active {
+  height: 240px;
+  overflow: hidden;
+}
+
+#hat-scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 240px;
+  transform-origin: 50% 100%;
+}
+
+#hat {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 200px;
+  height: 170px;
+  margin-left: -100px;
+  transform-origin: 50% 100%;
+  z-index: 2;
+  transition: transform 0.2s;
+}
+
+main.can-pick #hat:hover {
+  transform: rotate(-4deg);
+}
+
+#hat.shaking {
+  animation: hat-shake 0.25s ease-in-out 6;
+}
+
+@keyframes hat-shake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+
+#hat-slips {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hat-slip {
+  position: absolute;
+  left: 50%;
+  top: 110px;
+  width: 64px;
+  height: 20px;
+  margin-left: -32px;
+  background: #e8e0c8;
+  color: #333;
+  font-size: 0.6rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: slip-peek 0.7s ease-in-out var(--delay) both;
+}
+
+@keyframes slip-peek {
+  0%, 100% { transform: translate(var(--dx), 0) rotate(var(--rot)); }
+  50% { transform: translate(var(--dx), -55px) rotate(calc(var(--rot) * -1)); }
+}
+
+#hat-note {
+  position: absolute;
+  left: 50%;
+  top: 110px;
+  width: 100px;
+  height: 40px;
+  transform: translate(-50%, 0) rotate(-3deg);
+  opacity: 0;
+  background: #f3ecd8 linear-gradient(to bottom, transparent 48%, rgba(0, 0, 0, 0.18) 50%, transparent 52%);
+  color: #111;
+  border-radius: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.2s, width 0.45s ease, height 0.45s ease;
+}
+
+#hat-note.risen {
+  opacity: 1;
+  transform: translate(-50%, -100px) rotate(2deg);
+}
+
+#hat-note.open {
+  width: min(280px, 100%);
+  height: 64px;
+  background-image: none;
+  transform: translate(-50%, -100px) rotate(0);
+}
+
+#hat-note span {
+  max-width: 100%;
+  padding: 0 1rem;
+  font-size: 1.4rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.3s 0.25s;
+}
+
+#hat-note.open span {
+  opacity: 1;
+}
+
+/* Enarmad bandit */
+#slot-machine {
+  display: flex;
+  width: 100%;
+}
+
+#reel-box {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+#reel-window {
+  height: 224px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border-radius: 6px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+}
+
+#reel {
+  will-change: transform;
+}
+
+.reel-item {
+  height: 56px;
+  line-height: 56px;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reel-item.win {
+  color: #fff;
+}
+
+#reel-frame {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 84px;
+  height: 56px;
+  border-top: 1px solid #555;
+  border-bottom: 1px solid #555;
+  pointer-events: none;
+}
+
+/* Spaken: armen fälls genom vridpunkten med scaleY, kulan följer med */
+#lever,
+#lever:hover,
+#lever:disabled {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 224px;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+#lever:active {
+  cursor: grabbing;
+}
+
+#lever:disabled {
+  cursor: default;
+}
+
+#lever-mount {
+  position: absolute;
+  left: 0;
+  top: 92px;
+  width: 30px;
+  height: 40px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+}
+
+#lever-arm {
+  position: absolute;
+  left: 30px;
+  top: 20px;
+  width: 8px;
+  height: 92px;
+  margin-left: -4px;
+  background: linear-gradient(to right, #666, #ddd 40%, #888);
+  border-radius: 4px;
+  transform-origin: 50% 100%;
+}
+
+#lever-knob {
+  position: absolute;
+  left: 30px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  background: radial-gradient(circle at 35% 35%, #ff8a80, #b3261e 55%, #6d1510);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+#lever:disabled #lever-knob {
+  filter: grayscale(0.6) brightness(0.7);
+}
+
+#history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#export-history {
+  background: none;
+  color: #666;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+#export-history:hover {
+  background: none;
+  color: #fff;
+}
+
+#history h2 {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+#history ol {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#history li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: #aaa;
+}
+
+#history li .rank {
+  font-size: 0.7rem;
+  color: #444;
+  width: 1rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+#history li .hist-name {
+  flex: 1;
+}
+
+#history li .hist-mode,
+#history li .hist-date {
+  font-size: 0.75rem;
+  color: #555;
+  flex-shrink: 0;
+}
+
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
