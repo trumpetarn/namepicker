@@ -54,7 +54,7 @@ function setSpinning(on) {
 // one, which then becomes the selected mode. The draw itself is still started by hand.
 function shuffleMode() {
   if (spinning) return;
-  const target = MODES[Math.floor(Math.random() * MODES.length)];
+  const target = MODES[randomInt(MODES.length)];
   const btns = MODES.map(m => document.querySelector(`#mode-switch button[data-mode="${m}"]`));
   const stage = document.getElementById('stage');
   const start = Math.floor(Math.random() * MODES.length);
@@ -101,7 +101,7 @@ function pickName(velocity) {
   const names = getNames();
   if (names.length === 0) return;
 
-  const winnerIdx = Math.floor(Math.random() * names.length);
+  const winnerIdx = randomInt(names.length);
   const winner = names[winnerIdx];
   const usedMode = mode;
   const done = () => land(winner, usedMode);
