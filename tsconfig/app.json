@@ -1,0 +1,4 @@
+{
+  "extends": "./base.json",
+  "include": ["../jakobmarkgren.se/public_html/namepicker/*.js"]
+}

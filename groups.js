@@ -38,8 +38,8 @@ function namesFromText(text) {
 }
 
 function updateGroupControls() {
-  document.querySelectorAll('#group-bar button').forEach(b => b.disabled = spinning);
-  if (state.groups.length === 1) document.getElementById('delete-group').disabled = true;
+  /** @type {NodeListOf<HTMLButtonElement>} */ (document.querySelectorAll('#group-bar button')).forEach(b => b.disabled = spinning);
+  if (state.groups.length === 1) /** @type {HTMLButtonElement} */ (document.getElementById('delete-group')).disabled = true;
 }
 
 function renderTabs() {
@@ -50,7 +50,7 @@ function renderTabs() {
     tab.type = 'button';
     tab.className = 'group-tab';
     tab.setAttribute('role', 'tab');
-    tab.setAttribute('aria-selected', group.id === state.active);
+    tab.setAttribute('aria-selected', String(group.id === state.active));
     tab.textContent = group.name;
     tab.title = group.name;
     tab.addEventListener('click', () => switchGroup(group.id));

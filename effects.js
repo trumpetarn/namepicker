@@ -1,7 +1,7 @@
 // Confetti and Web Audio sound effects (ticks and the winner fanfare).
 
 function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
+  const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('confetti-canvas'));
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -19,7 +19,6 @@ function launchConfetti() {
     vy: Math.random() * 3 + 2,
   }));
 
-  let animId;
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let alive = false;
@@ -37,7 +36,7 @@ function launchConfetti() {
       ctx.restore();
     }
     if (alive) {
-      animId = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
     } else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -48,7 +47,7 @@ function launchConfetti() {
 let audioCtx = null;
 
 function getAudio() {
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
   if (!AudioCtx) return null;
   if (!audioCtx) audioCtx = new AudioCtx();
   if (audioCtx.state === 'suspended') audioCtx.resume();
