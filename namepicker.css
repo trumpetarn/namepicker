@@ -242,6 +242,55 @@ button:disabled {
   margin-right: auto;
 }
 
+/* Metoder: vilka dragningsmetoder gruppen använder */
+#method-settings {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem 0.75rem;
+}
+
+#method-settings legend {
+  padding: 0 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#method-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+#method-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+#method-list input {
+  accent-color: var(--accent-bg);
+  cursor: pointer;
+}
+
+#method-list input:disabled,
+#method-list input:disabled + * {
+  cursor: default;
+}
+
+#mode-switch button[hidden] {
+  display: none;
+}
+
 /* Namnlistan dold: ge hjulet och hatten mer plats */
 main.names-hidden #names {
   display: none;
@@ -282,7 +331,8 @@ main.names-hidden #hat-scene {
   font-weight: 400;
 }
 
-#mode-switch button + button {
+/* A divider before every button that follows a visible one (methods can be hidden) */
+#mode-switch button:not([hidden]) ~ button {
   border-left: 1px solid var(--border);
 }
 
