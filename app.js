@@ -8,19 +8,19 @@ const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade bandit
 const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken' };
 let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
 
-const pickBtn = document.getElementById('pick-btn');
+const pickBtn = /** @type {HTMLButtonElement} */ (document.getElementById('pick-btn'));
 const chosen = document.getElementById('chosen');
 // Includes the Slumpa button, so it's disabled along with the others during a draw.
-const modeBtns = document.querySelectorAll('#mode-switch button');
+const modeBtns = /** @type {NodeListOf<HTMLButtonElement>} */ (document.querySelectorAll('#mode-switch button'));
 
 function getNames() {
-  return document.getElementById('names').value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+  return textarea.value.split('\n').map(n => n.trim()).filter(n => n.length > 0);
 }
 
 function setMode(m) {
   mode = m;
   localStorage.setItem(MODE_KEY, m);
-  modeBtns.forEach(b => b.dataset.mode && b.setAttribute('aria-pressed', b.dataset.mode === m));
+  modeBtns.forEach(b => b.dataset.mode && b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
   document.querySelectorAll('.stage-panel').forEach(p => p.classList.toggle('active', p.id === m + '-stage'));
   pickBtn.textContent = PICK_LABELS[m];
   refreshStage();
@@ -131,7 +131,7 @@ for (const el of [document.getElementById('wheel'), document.getElementById('hat
   });
 }
 
-const textarea = document.getElementById('names');
+const textarea = /** @type {HTMLTextAreaElement} */ (document.getElementById('names'));
 
 function autoResize() {
   textarea.style.height = 'auto';
@@ -147,7 +147,7 @@ function namesHidden() {
 
 function updateToggleLabel() {
   toggleNamesBtn.textContent = namesHidden() ? `Visa namn (${getNames().length})` : 'Dölj namn';
-  toggleNamesBtn.setAttribute('aria-expanded', !namesHidden());
+  toggleNamesBtn.setAttribute('aria-expanded', String(!namesHidden()));
 }
 
 function setNamesHidden(hidden) {
@@ -159,8 +159,8 @@ function setNamesHidden(hidden) {
   refreshStage();
 }
 
-textarea.addEventListener('input', function () {
-  activeGroup().names = this.value;
+textarea.addEventListener('input', () => {
+  activeGroup().names = textarea.value;
   saveGroups();
   autoResize();
   updatePickEnabled();

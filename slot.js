@@ -82,7 +82,7 @@ function spinSlot(names, winnerIdx, onDone) {
 
 // --- Spaken ---
 
-const lever = document.getElementById('lever');
+const lever = /** @type {HTMLButtonElement} */ (document.getElementById('lever'));
 const leverArm = document.getElementById('lever-arm');
 const leverKnob = document.getElementById('lever-knob');
 const LEVER_TRAVEL = 184;  // knob travel from top to bottom, through the pivot

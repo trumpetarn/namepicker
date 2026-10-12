@@ -12,7 +12,7 @@ function fitText(ctx, text, maxWidth) {
 }
 
 function drawWheel(names) {
-  const canvas = document.getElementById('wheel');
+  const canvas = wheelCanvas;
   const size = canvas.clientWidth;
   if (!size) return;
   const dpr = window.devicePixelRatio || 1;
@@ -127,7 +127,7 @@ function spinWheel(names, winnerIdx, onDone, velocity) {
 
 // --- Dra i hjulet ---
 
-const wheelCanvas = document.getElementById('wheel');
+const wheelCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('wheel'));
 const WHEEL_DRAG_MIN = 6;         // px of pointer travel before a press counts as a drag
 const WHEEL_FLICK_MIN = 0.004;    // rad/ms needed on release to start a spin
 const WHEEL_FLICK_WINDOW = 100;   // ms of recent movement used to measure the flick
