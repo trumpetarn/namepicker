@@ -226,6 +226,11 @@ main.names-hidden #hat-scene {
   border-left: 1px solid #333;
 }
 
+/* Kort etikett, så ge de tre metoderna mer plats */
+#shuffle-mode {
+  flex: 0.7;
+}
+
 #mode-switch button:hover {
   background: #1a1a1a;
   color: #fff;
@@ -244,6 +249,29 @@ main.names-hidden #hat-scene {
 #mode-switch button[aria-pressed="true"]:disabled {
   background: #333;
   color: #888;
+}
+
+/* Slumpa: markeringen hoppar mellan metoderna innan dragningen */
+#mode-switch button.shuffle-hit,
+#mode-switch button.shuffle-hit:disabled {
+  background: #fff;
+  color: #111;
+}
+
+#mode-switch button.shuffle-done {
+  animation: shuffle-done 0.35s ease-in-out 2;
+}
+
+@keyframes shuffle-done {
+  50% { background: #ffd93d; }
+}
+
+#stage {
+  transition: opacity 0.3s;
+}
+
+#stage.shuffling {
+  opacity: 0.25;
 }
 
 .stage-panel {
@@ -267,12 +295,18 @@ main.names-hidden #hat-scene {
   display: block;
   width: 100%;
   height: 100%;
+  /* Dragging spins the wheel instead of scrolling the page. */
+  touch-action: none;
 }
 
 /* Hjulet, hatten och spaken går att klicka på som alternativ till knappen */
 main.can-pick #wheel,
 main.can-pick #hat {
   cursor: pointer;
+}
+
+main.can-pick #wheel.dragging {
+  cursor: grabbing;
 }
 
 #wheel-pointer {

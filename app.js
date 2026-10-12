@@ -10,6 +10,7 @@ let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem
 
 const pickBtn = document.getElementById('pick-btn');
 const chosen = document.getElementById('chosen');
+// Includes the Slumpa button, so it's disabled along with the others during a draw.
 const modeBtns = document.querySelectorAll('#mode-switch button');
 
 function getNames() {
@@ -19,7 +20,7 @@ function getNames() {
 function setMode(m) {
   mode = m;
   localStorage.setItem(MODE_KEY, m);
-  modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  modeBtns.forEach(b => b.dataset.mode && b.setAttribute('aria-pressed', b.dataset.mode === m));
   document.querySelectorAll('.stage-panel').forEach(p => p.classList.toggle('active', p.id === m + '-stage'));
   pickBtn.textContent = PICK_LABELS[m];
   refreshStage();
@@ -47,6 +48,42 @@ function setSpinning(on) {
   updateGroupControls();
 }
 
+// --- Slumpa metod ---
+
+// The highlight runs over the method buttons, slowing down until it stops on a random
+// one, which then becomes the selected mode. The draw itself is still started by hand.
+function shuffleMode() {
+  if (spinning) return;
+  const target = MODES[Math.floor(Math.random() * MODES.length)];
+  const btns = MODES.map(m => document.querySelector(`#mode-switch button[data-mode="${m}"]`));
+  const stage = document.getElementById('stage');
+  const start = Math.floor(Math.random() * MODES.length);
+  // At least two full laps, ending on the target.
+  const steps = MODES.length * 2 + ((MODES.indexOf(target) - start + MODES.length) % MODES.length) + 1;
+
+  setSpinning(true);
+  stage.classList.add('shuffling');
+  pickBtn.textContent = 'Slumpar metod…';
+
+  function step(k) {
+    btns.forEach((b, i) => b.classList.toggle('shuffle-hit', i === (start + k) % MODES.length));
+    playTick(k === steps - 1 ? 1000 : 1400);
+    if (k < steps - 1) {
+      setTimeout(() => step(k + 1), 60 + 340 * Math.pow(k / steps, 3));
+      return;
+    }
+    // Flash the chosen method, then switch to it.
+    btns[MODES.indexOf(target)].classList.add('shuffle-done');
+    setTimeout(() => {
+      btns.forEach(b => b.classList.remove('shuffle-hit', 'shuffle-done'));
+      stage.classList.remove('shuffling');
+      setSpinning(false);
+      setMode(target);
+    }, 700);
+  }
+  step(0);
+}
+
 // --- Dragning ---
 
 function land(winner, usedMode) {
@@ -58,7 +95,8 @@ function land(winner, usedMode) {
   playFanfare();
 }
 
-function pickName() {
+// velocity: optional flick speed from dragging the wheel.
+function pickName(velocity) {
   if (spinning) return;
   const names = getNames();
   if (names.length === 0) return;
@@ -71,7 +109,7 @@ function pickName() {
   setSpinning(true);
   chosen.className = '';
 
-  if (mode === 'wheel') spinWheel(names, winnerIdx, done);
+  if (mode === 'wheel') spinWheel(names, winnerIdx, done, velocity);
   else if (mode === 'hat') drawFromHat(names, winner, done);
   else {
     swingLever();
@@ -81,7 +119,11 @@ function pickName() {
 
 // Click (or Enter/Space) on the wheel or the hat instead of the button.
 for (const el of [document.getElementById('wheel'), document.getElementById('hat')]) {
-  el.addEventListener('click', pickName);
+  el.addEventListener('click', () => {
+    // A finished wheel drag already handled itself; ignore the click that follows it.
+    if (performance.now() < wheelIgnoreClickUntil) return;
+    pickName();
+  });
   el.addEventListener('keydown', e => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
@@ -137,7 +179,7 @@ window.addEventListener('hashchange', () => {
   showActiveGroup();
 });
 
-modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+modeBtns.forEach(b => b.addEventListener('click', () => b.dataset.mode ? setMode(b.dataset.mode) : shuffleMode()));
 window.addEventListener('resize', () => { if (!spinning) refreshStage(); });
 
 importFromHash();
