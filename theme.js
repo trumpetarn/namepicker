@@ -33,3 +33,5 @@ function setTheme(t) {
 
 themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
 showTheme();
+// Clown mode may fall back to the Comic Neue web font; redraw the canvases once it has loaded.
+document.fonts?.addEventListener('loadingdone', () => refreshStage());

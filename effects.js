@@ -57,7 +57,22 @@ function showSpotlight(name) {
   clearTimeout(spotlightTimer);
   el.classList.remove('leaving');
   el.hidden = false;
+  fitSpotlightName();
   spotlightTimer = setTimeout(hideSpotlight, SPOTLIGHT_MS);
+}
+
+// Shrink the name until its longest word fits on the screen, so words wrap between each
+// other instead of being split mid-word (CSS splits them only below the minimum size).
+function fitSpotlightName() {
+  const nameEl = document.getElementById('spotlight-name');
+  nameEl.style.fontSize = '';
+  nameEl.style.overflowWrap = 'normal';
+  let size = parseFloat(getComputedStyle(nameEl).fontSize);
+  while (nameEl.scrollWidth > nameEl.clientWidth && size > 24) {
+    size -= 2;
+    nameEl.style.fontSize = size + 'px';
+  }
+  nameEl.style.overflowWrap = '';
 }
 
 function hideSpotlight() {
