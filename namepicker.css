@@ -278,14 +278,16 @@ button:disabled {
   margin-right: auto;
 }
 
-/* Metoder: vilka dragningsmetoder gruppen använder */
-#method-settings {
+/* Metoder: vilka dragningsmetoder gruppen använder. Fil: export och import. */
+#method-settings,
+#file-settings {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.6rem 0.9rem 0.75rem;
 }
 
-#method-settings legend {
+#method-settings legend,
+#file-settings legend {
   padding: 0 0.4rem;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
@@ -321,6 +323,39 @@ button:disabled {
 #method-list input:disabled,
 #method-list input:disabled + * {
   cursor: default;
+}
+
+#file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+#file-actions button {
+  background: none;
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+#file-actions button:hover {
+  background: var(--surface);
+  color: var(--fg);
+}
+
+#file-actions button:disabled {
+  background: none;
+  color: var(--border);
+}
+
+.file-hint {
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--faint);
 }
 
 #mode-switch button[hidden] {
@@ -733,7 +768,13 @@ main.can-pick #hat:hover {
   justify-content: space-between;
 }
 
-#export-history {
+#history-tools {
+  display: flex;
+  gap: 1rem;
+}
+
+#history-tools button,
+#history-more {
   background: none;
   color: var(--subtle);
   padding: 0;
@@ -741,8 +782,64 @@ main.can-pick #hat:hover {
   font-weight: 400;
 }
 
-#export-history:hover {
+#history-tools button:hover,
+#history-more:hover {
   background: none;
+  color: var(--fg);
+}
+
+#history-more {
+  align-self: flex-start;
+  margin-left: 2.25rem; /* lines up with the names */
+}
+
+#history-more[hidden] {
+  display: none;
+}
+
+/* Slå ihop / Ersätt / Avbryt när historik importeras */
+#import-dialog {
+  margin: auto; /* the reset above removes the default centring */
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font);
+}
+
+#import-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#import-dialog p {
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+#import-dialog-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#import-dialog-buttons button {
+  padding: 0.55rem 1rem;
+  font-size: 0.75rem;
+}
+
+#import-dialog-buttons button:not([value="merge"]) {
+  background: none;
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+
+#import-dialog-buttons button:not([value="merge"]):hover {
+  background: var(--bg);
   color: var(--fg);
 }
 
@@ -799,7 +896,7 @@ main.can-pick #hat:hover {
 #history li .rank {
   font-size: 0.7rem;
   color: var(--dim);
-  width: 1rem;
+  width: 1.5rem;
   text-align: right;
   flex-shrink: 0;
 }
@@ -819,7 +916,7 @@ main.can-pick #hat:hover {
 @container (max-width: 420px) {
   #history li {
     display: grid;
-    grid-template-columns: 1rem 1fr auto;
+    grid-template-columns: 1.5rem 1fr auto;
     column-gap: 0.75rem;
   }
 

@@ -74,7 +74,7 @@
   <title>Namnväljare – Jakob Markgren</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/favicon.png">
-  <link rel="stylesheet" href="namepicker.css?v=20261023">
+  <link rel="stylesheet" href="namepicker.css?v=20261026">
 </head>
 <body>
   <details class="site-menu">
@@ -119,10 +119,20 @@
         <button type="button" id="delete-group">Ta bort</button>
         <button type="button" id="share-group">Dela</button>
         <button type="button" id="method-settings-btn" aria-expanded="false" aria-controls="method-settings">Metoder</button>
+        <button type="button" id="file-settings-btn" aria-expanded="false" aria-controls="file-settings">Fil</button>
       </div>
       <fieldset id="method-settings" hidden>
         <legend>Metoder i <span id="method-group-name"></span></legend>
         <div id="method-list"></div>
+      </fieldset>
+      <fieldset id="file-settings" hidden>
+        <legend>Spara och läs in</legend>
+        <div id="file-actions">
+          <button type="button" id="export-group">Exportera gruppen</button>
+          <button type="button" id="import-group">Importera grupp</button>
+          <button type="button" id="import-history-file">Importera historik</button>
+        </div>
+        <p class="file-hint">En exporterad grupp är en fil med namn, metoder och hela historiken, och blir en ny flik när den importeras. Historik kan läsas in från en CSV-export eller ett Excel-ark med kolumnerna Datum, Namn och Metod.</p>
       </fieldset>
     </div>
     <textarea id="names" placeholder="Skriv ett namn per rad&#10;&#10;Anna&#10;Bo&#10;Cecilia&#10;David"></textarea>
@@ -177,22 +187,37 @@
     <div id="history" style="display:none">
       <div id="history-head">
         <h2><button type="button" id="toggle-history" aria-controls="history-list" aria-expanded="true">Historik</button></h2>
-        <button type="button" id="export-history">Exportera CSV</button>
+        <div id="history-tools">
+          <button type="button" id="import-history">Importera</button>
+          <button type="button" id="export-history">Exportera CSV</button>
+        </div>
       </div>
       <ol id="history-list"></ol>
+      <button type="button" id="history-more" hidden></button>
     </div>
   </main>
-  <script src="random.js?v=20261023"></script>
-  <script src="theme.js?v=20261023"></script>
-  <script src="effects.js?v=20261023"></script>
-  <script src="groups.js?v=20261023"></script>
-  <script src="history.js?v=20261023"></script>
-  <script src="share.js?v=20261023"></script>
-  <script src="wheel.js?v=20261023"></script>
-  <script src="hat.js?v=20261023"></script>
-  <script src="slot.js?v=20261023"></script>
-  <script src="remote.js?v=20261023"></script>
-  <script src="app.js?v=20261023"></script>
+  <dialog id="import-dialog">
+    <form method="dialog">
+      <p id="import-dialog-text"></p>
+      <div id="import-dialog-buttons">
+        <button value="merge">Slå ihop</button>
+        <button value="replace">Ersätt</button>
+        <button value="cancel">Avbryt</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="random.js?v=20261026"></script>
+  <script src="theme.js?v=20261026"></script>
+  <script src="effects.js?v=20261026"></script>
+  <script src="groups.js?v=20261026"></script>
+  <script src="history.js?v=20261026"></script>
+  <script src="share.js?v=20261026"></script>
+  <script src="transfer.js?v=20261026"></script>
+  <script src="wheel.js?v=20261026"></script>
+  <script src="hat.js?v=20261026"></script>
+  <script src="slot.js?v=20261026"></script>
+  <script src="remote.js?v=20261026"></script>
+  <script src="app.js?v=20261026"></script>
 
 </body>
 </html>
