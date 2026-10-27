@@ -10,9 +10,6 @@ const np = loadScripts(
 // Objects from the scripts come from another vm realm, so compare them as JSON.
 const plain = value => JSON.parse(JSON.stringify(value));
 
-// Reads a CSV the way the page does (minus the file and encoding handling).
-const csvRows = text => np.parseCsv(text).map(row => row.map(np.unguardCell));
-
 test('parseCsv handles the BOM, quotes, doubled quotes, line breaks and CRLF', () => {
   const text = '\ufeffNamn;Metod\r\n"Anna; Bo";"Säger ""hej"""\r\n"Två\nrader";\r\n';
   assert.deepEqual(plain(np.parseCsv(text)), [
@@ -20,11 +17,6 @@ test('parseCsv handles the BOM, quotes, doubled quotes, line breaks and CRLF', (
     ['Anna; Bo', 'Säger "hej"'],
     ['Två\nrader', ''],
   ]);
-});
-
-test('parseCsv picks up a comma- or tab-separated file', () => {
-  assert.deepEqual(plain(np.parseCsv('Date,Name\n2025-09-01,"Per, J"\n')), [['Date', 'Name'], ['2025-09-01', 'Per, J']]);
-  assert.deepEqual(plain(np.parseCsv('Date\tName\n2025-09-01\tPer')), [['Date', 'Name'], ['2025-09-01', 'Per']]);
 });
 
 test("the export's formula guard is removed again, and only that", () => {
@@ -43,10 +35,9 @@ test('export followed by import gives back the same history', () => {
       { name: 'David', date: null },
     ],
   };
-  const { entries, noDate } = np.historyFromRows(csvRows(np.historyCsv(group)));
+  const entries = np.historyFromCsv(np.historyCsv(group));
   const expected = group.history.map(e => ({ ...e, date: e.date && new Date(Math.floor(Date.parse(e.date) / 60000) * 60000).toISOString() }));
   assert.deepEqual(plain(entries), expected, 'seconds are lost, everything else stays');
-  assert.equal(noDate, 1);
 });
 
 test('mergeHistory drops exact duplicates (to the minute) and sorts newest first', () => {
@@ -75,38 +66,27 @@ test('mergeHistory drops exact duplicates (to the minute) and sorts newest first
   ]);
 });
 
-// Like the old standup spreadsheets saved as CSV: a count table next to the history, which
-// starts lower down, and "-" on days without a pick.
-const SPREADSHEET = [
-  [],
-  ['', 'Länk', 'https://wheelofnames.com/x'],
-  [],
-  ['', 'Namn', 'Antal'],
-  ['', 'Per', '2'],
-  ['', 'Date', 'Name', 'Method', 'Chosen but MIA', 'Comment', '', 'Name', 'Count'],
-  ['', '2025-09-01', 'Malin', 'Wheel of Names', '', '', '', 'Malin', '1'],
-  ['', '2025-09-02', '-', '', '', 'Weekend'],
-  ['', '2025-09-03', 'Per', 'fjärrkontrollen', 'Bo'],
-  ['', 'okänt', 'Per', ''],
-  ['', '2025-09-04'],
-];
+const HEADER = 'Grupp;Namn;Metod;Datum;Tid\r\n';
 
-test('historyFromRows reads an old spreadsheet', () => {
-  const { entries, noDate } = np.historyFromRows(SPREADSHEET);
-  assert.deepEqual(plain(entries), [
-    { name: 'Per', mode: 'remote', date: new Date(2025, 8, 3).toISOString() },
-    { name: 'Malin', method: 'Wheel of Names', date: new Date(2025, 8, 1).toISOString() },
-    { name: 'Per', date: null },
-  ]);
-  assert.equal(noDate, 1);
+test('historyFromCsv only accepts the export format', () => {
+  const rejects = (text, pattern) => assert.throws(() => np.historyFromCsv(text), pattern);
+  rejects('', /ingen historikexport/);
+  rejects('Datum;Namn\r\n2026-01-01;Anna\r\n', /ingen historikexport/);
+  rejects('Grupp,Namn,Metod,Datum,Tid\r\nG,Anna,,2026-01-01,12:00\r\n', /ingen historikexport/, 'commas');
+  rejects(HEADER + 'G;Anna;Hatten;2026-01-01\r\n', /Rad 2 har 4 kolumner/);
+  rejects(HEADER + 'G;Anna;;2026-01-01;12:00\r\nG; ;;2026-01-01;12:00\r\n', /Rad 3 saknar namn/);
+  for (const [day, time] of [['2026-02-30', '12:00'], ['2026-1-5', '12:00'], ['2026-01-05', '24:00'], ['2026-01-05', ''], ['', '12:00'], ['5/1/2026', '12:00']]) {
+    rejects(HEADER + `G;Anna;;${day};${time}\r\n`, /Rad 2 har ett ogiltigt datum/);
+  }
 });
 
-test('historyFromRows needs a name column, and reads a time column', () => {
-  assert.equal(np.historyFromRows([['Datum', 'Antal'], ['2026-01-01', '3']]), null);
-  const { entries } = np.historyFromRows([['Datum', 'Tid', 'Namn'], ['2025-09-01', '12.30', 'Anna']]);
-  assert.equal(entries[0].date, new Date(2025, 8, 1, 12, 30).toISOString());
-  const { entries: bad } = np.historyFromRows([['Datum', 'Namn'], ['2026-02-30', 'Anna']]);
-  assert.equal(bad[0].date, null, 'an impossible date is no date');
+test('historyFromCsv reads dates as local time, methods by name, and skips blank lines', () => {
+  const entries = np.historyFromCsv('\ufeff' + HEADER + 'G;Anna;Hatten;2025-09-01;12:30\r\n\r\nG;Bo;Wheel of Names;;\r\nG;Cecilia;Lyckohjulet;2025-09-02;08:05\r\n');
+  assert.deepEqual(plain(entries), [
+    { name: 'Cecilia', mode: 'wheel', date: new Date(2025, 8, 2, 8, 5).toISOString() },
+    { name: 'Anna', mode: 'hat', date: new Date(2025, 8, 1, 12, 30).toISOString() },
+    { name: 'Bo', method: 'Wheel of Names', date: null },
+  ]);
 });
 
 test('a group file survives export and import', () => {

@@ -1,17 +1,13 @@
-// Files: import history from CSV (our own export, or an old spreadsheet saved as CSV),
-// and export/import a whole group as JSON. Files are read locally only.
+// Files: import history from the page's own CSV export, and export/import a whole group
+// as JSON. Files are read locally only, and anything else is rejected rather than guessed at.
 
-// --- Reading CSV ---
+// --- Reading the history CSV ---
 
-// Our export uses semicolons; a CSV saved by Excel in another locale may use commas or tabs.
+// Exactly what historyCsv writes (semicolons, UTF-8 with a BOM); other files are rejected.
+const CSV_HEADER = ['Grupp', 'Namn', 'Metod', 'Datum', 'Tid'];
+
 function parseCsv(text) {
   text = text.replace(/^\ufeff/, '');
-  const end = text.search(/[\r\n]/);
-  const firstLine = end < 0 ? text : text.slice(0, end);
-  const delims = [';', ',', '\t'];
-  const counts = delims.map(d => firstLine.split(d).length);
-  const delim = delims[counts.indexOf(Math.max(...counts))];
-
   const rows = [];
   let row = [];
   let cell = '';
@@ -24,7 +20,7 @@ function parseCsv(text) {
       else quoted = false;
     } else if (c === '"' && cell === '') {
       quoted = true;
-    } else if (c === delim) {
+    } else if (c === ';') {
       row.push(cell);
       cell = '';
     } else if (c === '\n' || c === '\r') {
@@ -49,66 +45,25 @@ function unguardCell(text) {
   return /^'[=+\-@\t\r]/.test(text) ? text.slice(1) : text;
 }
 
-// --- Rows to history entries ---
-
-const HEADERS = {
-  name: ['namn', 'name'],
-  date: ['datum', 'date', 'dag', 'day'],
-  method: ['metod', 'method'],
-  time: ['tid', 'time', 'klockslag'],
-};
-
-function cellText(value) {
-  return value === undefined || value === null ? '' : String(value).trim();
-}
-
-// Finds the header row: preferably one with both a name and a date column, as a sheet can
-// hold other small tables (like a count per name) next to the history.
-function findHeader(rows) {
-  const columns = (row, kind) => row.flatMap((v, i) => HEADERS[kind].includes(cellText(v).toLowerCase()) ? [i] : []);
-  const nearest = (cols, to) => cols.length ? cols.reduce((a, b) => Math.abs(b - to) < Math.abs(a - to) ? b : a) : -1;
-  for (const needDate of [true, false]) {
-    for (let r = 0; r < rows.length; r++) {
-      const names = columns(rows[r], 'name');
-      const dates = columns(rows[r], 'date');
-      if (!names.length || (needDate && !dates.length)) continue;
-      // With several name columns, take the one closest to a date column.
-      const gap = col => Math.abs(col - nearest(dates, col));
-      const name = dates.length ? names.reduce((a, b) => gap(b) < gap(a) ? b : a) : names[0];
-      return {
-        row: r,
-        name,
-        date: nearest(dates, name),
-        method: nearest(columns(rows[r], 'method'), name),
-        time: nearest(columns(rows[r], 'time'), name),
-      };
-    }
+// Datum (YYYY-MM-DD) and Tid (HH:MM) as Swedish local time, to an ISO string. Both empty
+// means no date (entries saved before dates were recorded); undefined means invalid.
+function csvDate(day, time) {
+  if (!day && !time) return null;
+  const d = day.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const t = time.match(/^(\d{2}):(\d{2})$/);
+  if (!d || !t) return undefined;
+  const [y, mo, dd, h, mi] = [...d.slice(1), ...t.slice(1)].map(Number);
+  const date = new Date(y, mo - 1, dd, h, mi);
+  if (h > 23 || mi > 59 || date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== dd) {
+    return undefined;
   }
-  return null;
-}
-
-function timeParts(value) {
-  const m = cellText(value).match(/^(\d{1,2})[:.](\d{2})/);
-  return m && +m[1] < 24 && +m[2] < 60 ? { h: +m[1], mi: +m[2] } : null;
-}
-
-// A YYYY-MM-DD date cell plus an optional time cell, read as Swedish local time, to an
-// ISO string; null if there's no valid date.
-function cellDate(value, time) {
-  const m = cellText(value).match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
-  if (!m || +m[1] < 1900) return null;
-  const parts = { y: +m[1], mo: +m[2], d: +m[3], h: +(m[4] ?? 0), mi: +(m[5] ?? 0) };
-  const t = cellText(time) ? timeParts(time) : null;
-  if (t) Object.assign(parts, t);
-  const date = new Date(parts.y, parts.mo - 1, parts.d, parts.h, parts.mi);
-  if (date.getFullYear() !== parts.y || date.getMonth() !== parts.mo - 1 || date.getDate() !== parts.d) return null;
   return date.toISOString();
 }
 
-// One of our methods by display name ("Lyckohjulet") or id ("wheel").
+// One of our methods by display name ("Lyckohjulet"); other text is a method that came
+// in with an imported group, kept as is.
 function modeFromMethod(text) {
-  const lower = text.toLowerCase();
-  return MODES.find(m => m === lower || MODE_NAMES[m].toLowerCase() === lower);
+  return MODES.find(m => MODE_NAMES[m] === text);
 }
 
 // Newest first; entries without a date last, in their original order.
@@ -118,26 +73,32 @@ function byDateDesc(a, b) {
   return ta === tb ? 0 : tb > ta ? 1 : -1;
 }
 
-// Returns { entries, noDate } or null if no header row is found. Rows without a name, or with
-// just "-" (a day without a pick in the old spreadsheets), are skipped.
-function historyFromRows(rows) {
-  const h = findHeader(rows);
-  if (!h) return null;
+// Returns the entries, newest first, or throws an Error with a message for the user naming
+// the first bad row. The Grupp column is ignored: the history goes into the active group.
+function historyFromCsv(text) {
+  const rows = parseCsv(text).map(row => row.map(unguardCell));
+  if (!rows.length || rows[0].join(';') !== CSV_HEADER.join(';')) {
+    throw new Error(`Filen är ingen historikexport från Namnväljaren. Första raden ska vara ${CSV_HEADER.join(';')}.`);
+  }
   const entries = [];
-  let noDate = 0;
-  for (const row of rows.slice(h.row + 1)) {
-    const name = cellText(row[h.name]).slice(0, 100);
-    if (!name || /^-+$/.test(name)) continue;
-    const entry = { name };
-    const method = h.method >= 0 ? cellText(row[h.method]) : '';
+  rows.slice(1).forEach((row, i) => {
+    const line = i + 2;
+    if (row.length === 1 && row[0] === '') return; // a blank line
+    if (row.length !== CSV_HEADER.length) {
+      throw new Error(`Rad ${line} har ${row.length} kolumner i stället för ${CSV_HEADER.length}.`);
+    }
+    const [, name, method, day, time] = row.map(cell => cell.trim());
+    if (!name) throw new Error(`Rad ${line} saknar namn.`);
+    const date = csvDate(day, time);
+    if (date === undefined) throw new Error(`Rad ${line} har ett ogiltigt datum eller klockslag: "${day} ${time}".`);
+    const entry = { name: name.slice(0, 100) };
     const mode = modeFromMethod(method);
     if (mode) entry.mode = mode;
     else if (method) entry.method = method.slice(0, 60);
-    entry.date = h.date >= 0 ? cellDate(row[h.date], h.time >= 0 ? row[h.time] : '') : null;
-    if (!entry.date) noDate++;
+    entry.date = date;
     entries.push(entry);
-  }
-  return { entries: entries.sort(byDateDesc), noDate };
+  });
+  return entries.sort(byDateDesc);
 }
 
 // Same name, method and minute: the export has no seconds.
@@ -210,18 +171,13 @@ function parseGroupFile(text) {
 
 // --- Page ---
 
-// Old spreadsheets saved as CSV by Swedish Excel are Windows-1252, not UTF-8.
-function decodeText(bytes) {
+// The export is UTF-8; a file in another encoding would garble åäö, so it's rejected.
+async function readCsvText(file) {
   try {
-    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    return new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer());
   } catch {
-    return new TextDecoder('windows-1252').decode(bytes);
+    throw new Error('Filen är inte UTF-8, så den är ingen historikexport från Namnväljaren.');
   }
-}
-
-async function readCsvFile(file) {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  return parseCsv(decodeText(bytes)).map(row => row.map(unguardCell));
 }
 
 function chooseFile(accept, onFile) {
@@ -261,38 +217,33 @@ function askImportChoice(group, count) {
 
 function importHistory() {
   if (spinning) return;
-  chooseFile('.csv,.txt,text/csv', async file => {
-    let found;
+  chooseFile('.csv,text/csv', async file => {
+    let entries;
     try {
-      found = historyFromRows(await readCsvFile(file));
-    } catch {
-      alert('Filen kunde inte läsas.');
+      entries = historyFromCsv(await readCsvText(file));
+    } catch (e) {
+      alert(e.message || 'Filen kunde inte läsas.');
       return;
     }
-    if (!found) {
-      alert('Hittade ingen historik i filen. Den behöver en rubrikrad med Namn, och gärna Datum, Tid och Metod.');
-      return;
-    }
-    if (!found.entries.length) {
+    if (!entries.length) {
       alert('Filen innehöll inga val.');
       return;
     }
     const group = activeGroup();
-    const choice = group.history.length ? await askImportChoice(group, found.entries.length) : 'replace';
+    const choice = group.history.length ? await askImportChoice(group, entries.length) : 'replace';
     if (choice === 'cancel' || spinning) return;
 
     const before = group.history;
     let summary;
     if (choice === 'merge') {
-      const merged = mergeHistory(before, found.entries);
+      const merged = mergeHistory(before, entries);
       group.history = merged.history;
       summary = plural(merged.added, 'post importerad', 'poster importerade');
       if (merged.duplicates) summary += `, ${plural(merged.duplicates, 'dubblett', 'dubbletter')} hoppades över`;
     } else {
-      group.history = found.entries;
-      summary = plural(found.entries.length, 'post importerad', 'poster importerade');
+      group.history = entries;
+      summary = plural(entries.length, 'post importerad', 'poster importerade');
     }
-    if (found.noDate) summary += `. ${plural(found.noDate, 'rad', 'rader')} saknade giltigt datum och sparades utan datum`;
     if (!trySaveGroups(() => { group.history = before; })) return;
     historyShowAll = false;
     renderHistory();
