@@ -139,11 +139,28 @@ function exportHistory() {
   downloadFile(exportFileName(group, 'csv'), historyCsv(group), 'text/csv;charset=utf-8');
 }
 
+// A new draw this soon after the previous one is taken as a redraw (a test spin, or the
+// wrong person), so the previous pick stops counting.
+const REDRAW_MS = 60 * 1000;
+
+// Marks the newest entry excluded if it was picked less than REDRAW_MS before now.
+// Returns that entry, or null.
+function excludeIfRedraw(history, now = new Date()) {
+  const last = history[0];
+  if (!last || last.excluded || !last.date) return null;
+  const age = now.getTime() - Date.parse(last.date);
+  if (!(age >= 0 && age < REDRAW_MS)) return null;
+  last.excluded = true;
+  return last;
+}
+
 // mode: which randomizer made the pick (missing on entries saved before it was recorded).
 // Returns the new entry.
 function addToHistory(name, mode) {
   const group = activeGroup();
-  const entry = { name, mode, date: new Date().toISOString() };
+  const now = new Date();
+  excludeIfRedraw(group.history, now);
+  const entry = { name, mode, date: now.toISOString() };
   group.history.unshift(entry);
   saveGroups();
   renderHistory();
