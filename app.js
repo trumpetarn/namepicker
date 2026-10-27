@@ -3,8 +3,6 @@
 let spinning = false;
 
 const MODE_KEY = 'namepicker-mode';
-const MODES = ['wheel', 'hat', 'slot', 'remote'];
-const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen', remote: 'Fjärrkontrollen' };
 const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken', remote: 'Snurra fjärren' };
 let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
 
@@ -238,7 +236,13 @@ document.getElementById('rename-group').addEventListener('click', renameGroup);
 document.getElementById('delete-group').addEventListener('click', deleteGroup);
 document.getElementById('share-group').addEventListener('click', shareGroup);
 methodSettingsBtn.addEventListener('click', toggleMethodSettings);
+document.getElementById('file-settings-btn').addEventListener('click', toggleFileSettings);
+document.getElementById('export-group').addEventListener('click', exportGroup);
+document.getElementById('import-group').addEventListener('click', importGroup);
+document.getElementById('import-history-file').addEventListener('click', importHistory);
+document.getElementById('import-history').addEventListener('click', importHistory);
 document.getElementById('export-history').addEventListener('click', exportHistory);
+document.getElementById('history-more').addEventListener('click', toggleHistoryShowAll);
 document.getElementById('toggle-history').addEventListener('click', toggleHistory);
 window.addEventListener('hashchange', () => {
   if (spinning) return;

@@ -2,7 +2,12 @@
 
 // Groups: { active: id, groups: [{ id, name, names: <textarea text>, history: [{ name, mode, date }],
 //           modes?: [enabled methods; all when missing] }] }
+// A history entry imported from elsewhere may have method (free text, e.g. "Wheel of Names")
+// instead of mode, and entries saved before modes were recorded have neither.
 const GROUPS_KEY = 'namepicker-groups';
+
+const MODES = ['wheel', 'hat', 'slot', 'remote'];
+const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen', remote: 'Fjärrkontrollen' };
 
 function newId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
