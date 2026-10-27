@@ -31,6 +31,10 @@
   --faint: #555;          /* placeholders, headings, history details */
   --dim: #444;            /* disabled text */
   --text-soft: #aaa;      /* history names */
+  /* The rest of the site theme (see the inline block), used here by the site menu */
+  --rule: #222;
+  --secondary: #999;
+  --bright: #ccc;
   --accent-bg: #fff;      /* main button, selected method */
   --accent-fg: #111;
   --accent-hover: #ddd;
@@ -51,6 +55,9 @@
   --faint: #8f8f8f;
   --dim: #bdbdb8;
   --text-soft: #444;
+  --rule: #e6e6e2;
+  --secondary: #555;
+  --bright: #222;
   --accent-bg: #111;
   --accent-fg: #fff;
   --accent-hover: #333;
@@ -72,6 +79,9 @@
   --faint: #a1887f;
   --dim: #d7c9a0;
   --text-soft: #1d1a5e;
+  --rule: #f9d0da;
+  --secondary: #7b4fa0;
+  --bright: #1d1a5e;
   --accent-bg: #e53935;
   --accent-fg: #fff;
   --accent-hover: #ff7043;

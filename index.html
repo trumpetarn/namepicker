@@ -11,20 +11,37 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    /* Site theme: the same block is inlined on every page. */
+    :root {
+      --bg: #111;
+      --surface: #1a1a1a;    /* cards, panels */
+      --rule: #222;          /* thin dividers */
+      --border: #333;
+      --dim: #444;           /* disabled, least important text */
+      --faint: #555;         /* labels, headings */
+      --subtle: #666;
+      --muted: #888;
+      --secondary: #999;     /* links, the menu, secondary text */
+      --text-soft: #aaa;
+      --bright: #ccc;        /* hovered secondary text */
+      --fg: #fff;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
     /* Site menu: the same block is inlined on every page. */
     .site-menu {
       position: absolute;
       top: 0.6rem;
       left: 1rem;
       z-index: 50;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font);
       font-weight: 300;
     }
 
     .site-menu summary {
       list-style: none;
       cursor: pointer;
-      color: #999;
+      color: var(--secondary);
       font-size: 0.75rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -43,14 +60,14 @@
 
     .site-menu summary:hover,
     .site-menu[open] summary {
-      color: #fff;
+      color: var(--fg);
     }
 
     .site-menu ul {
       list-style: none;
       margin: 0.5rem 0 0 -0.75rem;
       padding: 0.5rem 0.75rem;
-      background: #111;
+      background: var(--bg);
       border-radius: 6px;
       display: flex;
       flex-direction: column;
@@ -58,7 +75,7 @@
     }
 
     .site-menu a {
-      color: #999;
+      color: var(--secondary);
       text-decoration: none;
       font-size: 0.75rem;
       letter-spacing: 0.06em;
@@ -68,7 +85,7 @@
 
     .site-menu a:hover,
     .site-menu a[aria-current="page"] {
-      color: #fff;
+      color: var(--fg);
     }
   </style>
   <title>Namnväljare – Jakob Markgren</title>
