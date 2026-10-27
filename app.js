@@ -245,6 +245,9 @@ document.getElementById('import-history-file').addEventListener('click', importH
 document.getElementById('import-history').addEventListener('click', importHistory);
 document.getElementById('export-history').addEventListener('click', exportHistory);
 document.getElementById('history-more').addEventListener('click', toggleHistoryShowAll);
+document.getElementById('toggle-stats').addEventListener('click', toggleStats);
+document.getElementById('stats-period').addEventListener('change', e =>
+  setStatsPeriod(/** @type {HTMLSelectElement} */ (e.target).value));
 document.getElementById('toggle-history').addEventListener('click', toggleHistory);
 window.addEventListener('hashchange', () => {
   if (spinning) return;

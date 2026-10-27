@@ -220,12 +220,26 @@
       <div id="history-head">
         <h2><button type="button" id="toggle-history" aria-controls="history-list" aria-expanded="true">Historik</button></h2>
         <div id="history-tools">
+          <button type="button" id="toggle-stats" aria-pressed="false" aria-controls="history-stats">Statistik</button>
           <button type="button" id="import-history">Importera</button>
           <button type="button" id="export-history">Exportera CSV</button>
         </div>
       </div>
       <ol id="history-list"></ol>
       <button type="button" id="history-more" hidden></button>
+      <section id="history-stats" hidden aria-label="Statistik">
+        <div id="stats-controls">
+          <label for="stats-period">Period</label>
+          <select id="stats-period">
+            <option value="all">Allt</option>
+            <option value="year">I år</option>
+            <option value="90d">Senaste 3 månaderna</option>
+            <option value="30d">Senaste 30 dagarna</option>
+          </select>
+          <span id="stats-summary"></span>
+        </div>
+        <div id="stats-content"></div>
+      </section>
     </div>
   </main>
   <dialog id="import-dialog">
@@ -243,6 +257,7 @@
   <script src="effects.js"></script>
   <script src="groups.js"></script>
   <script src="history.js"></script>
+  <script src="stats.js"></script>
   <script src="share.js"></script>
   <script src="transfer.js"></script>
   <script src="wheel.js"></script>
