@@ -1,5 +1,5 @@
-// Files: import history from CSV (our own export or an old spreadsheet saved as CSV) or
-// Excel (.xlsx), and export/import a whole group as JSON. Files are read locally only.
+// Files: import history from CSV (our own export, or an old spreadsheet saved as CSV),
+// and export/import a whole group as JSON. Files are read locally only.
 
 // --- Reading CSV ---
 
@@ -49,88 +49,6 @@ function unguardCell(text) {
   return /^'[=+\-@\t\r]/.test(text) ? text.slice(1) : text;
 }
 
-// --- Reading Excel (.xlsx) ---
-
-// An .xlsx file is a zip of XML files. Returns { path: Uint8Array } for the files wanted.
-async function unzip(bytes, wanted) {
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  let eocd = -1;
-  for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
-    if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
-  }
-  if (eocd < 0) throw new Error('not a zip file');
-  const files = {};
-  let p = view.getUint32(eocd + 16, true);
-  for (let n = view.getUint16(eocd + 10, true); n > 0; n--) {
-    if (view.getUint32(p, true) !== 0x02014b50) throw new Error('bad zip directory');
-    const method = view.getUint16(p + 10, true);
-    const size = view.getUint32(p + 20, true);
-    const nameLen = view.getUint16(p + 28, true);
-    const local = view.getUint32(p + 42, true);
-    const name = new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nameLen));
-    p += 46 + nameLen + view.getUint16(p + 30, true) + view.getUint16(p + 32, true);
-    if (!wanted(name)) continue;
-    const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
-    const data = bytes.subarray(start, start + size);
-    if (method === 0) files[name] = data;
-    else if (method === 8) {
-      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-      files[name] = new Uint8Array(await new Response(stream).arrayBuffer());
-    } else throw new Error('unsupported zip compression');
-  }
-  return files;
-}
-
-function xmlText(xml) {
-  return xml.replace(/&(?:#x([0-9a-f]+)|#(\d+)|(amp|lt|gt|quot|apos));/gi, (_, hex, dec, named) =>
-    hex ? String.fromCodePoint(parseInt(hex, 16))
-      : dec ? String.fromCodePoint(Number(dec))
-      : { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }[named.toLowerCase()]);
-}
-
-// The text of a shared string or inline string: all its <t> runs, without phonetic hints.
-function xmlRuns(xml) {
-  return xmlText([...xml.replace(/<rPh\b[\s\S]*?<\/rPh>/g, '').matchAll(/<t\b[^>]*>([\s\S]*?)<\/t>/g)]
-    .map(m => m[1]).join(''));
-}
-
-function columnIndex(letters) {
-  let n = 0;
-  for (const ch of letters) n = n * 26 + ch.charCodeAt(0) - 64;
-  return n - 1;
-}
-
-// Returns { sheets: [rows of cells], date1904 }. Number cells stay numbers, so dates
-// (stored as day counts) can be told apart from text.
-async function readXlsx(bytes) {
-  const files = await unzip(bytes, name =>
-    name === 'xl/workbook.xml' || name === 'xl/sharedStrings.xml' || /^xl\/worksheets\/sheet\d+\.xml$/.test(name));
-  const text = name => files[name] ? new TextDecoder().decode(files[name]) : '';
-  const strings = [...text('xl/sharedStrings.xml').matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)].map(m => xmlRuns(m[1]));
-  const date1904 = /<workbookPr\b[^>]*\bdate1904="(1|true)"/.test(text('xl/workbook.xml'));
-  const sheetNames = Object.keys(files).filter(n => n.startsWith('xl/worksheets/'))
-    .sort((a, b) => parseInt(a.match(/\d+/)[0]) - parseInt(b.match(/\d+/)[0]));
-  const sheets = sheetNames.map(name => {
-    const rows = [];
-    for (const [, attrs, body = ''] of text(name).matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
-      const ref = attrs.match(/\br="([A-Z]+)(\d+)"/);
-      if (!ref) continue;
-      const type = (attrs.match(/\bt="(\w+)"/) || [])[1];
-      const v = (body.match(/<v>([\s\S]*?)<\/v>/) || [])[1];
-      let value;
-      if (type === 's') value = strings[Number(v)] ?? '';
-      else if (type === 'inlineStr') value = xmlRuns(body);
-      else if (type === 'str' || type === 'e') value = xmlText(v ?? '');
-      else if (type === 'b') value = v === '1' ? 'TRUE' : 'FALSE';
-      else value = v === undefined ? '' : Number(v);
-      const r = Number(ref[2]) - 1;
-      (rows[r] ??= [])[columnIndex(ref[1])] = value;
-    }
-    return Array.from(rows, row => row ?? []);
-  });
-  return { sheets, date1904 };
-}
-
 // --- Rows to history entries ---
 
 const HEADERS = {
@@ -169,35 +87,17 @@ function findHeader(rows) {
   return null;
 }
 
-// An Excel date: days since 1899-12-30 (or 1904-01-01), with the time of day as the fraction.
-function serialParts(serial, date1904) {
-  if (!(serial > 0)) return null;
-  let days = Math.floor(serial);
-  let minutes = Math.round((serial - days) * 1440);
-  if (minutes === 1440) { days++; minutes = 0; }
-  const d = new Date((date1904 ? Date.UTC(1904, 0, 1) : Date.UTC(1899, 11, 30)) + days * 86400000);
-  return { y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate(), h: Math.floor(minutes / 60), mi: minutes % 60 };
-}
-
 function timeParts(value) {
-  if (typeof value === 'number') {
-    const minutes = Math.round((value - Math.floor(value)) * 1440) % 1440;
-    return { h: Math.floor(minutes / 60), mi: minutes % 60 };
-  }
   const m = cellText(value).match(/^(\d{1,2})[:.](\d{2})/);
   return m && +m[1] < 24 && +m[2] < 60 ? { h: +m[1], mi: +m[2] } : null;
 }
 
-// A date cell (Excel day count or YYYY-MM-DD) plus an optional time cell, read as Swedish
-// local time, to an ISO string; null if there's no valid date.
-function cellDate(value, time, date1904) {
-  let parts = null;
-  if (typeof value === 'number') parts = serialParts(value, date1904);
-  else {
-    const m = cellText(value).match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
-    if (m) parts = { y: +m[1], mo: +m[2], d: +m[3], h: +(m[4] ?? 0), mi: +(m[5] ?? 0) };
-  }
-  if (!parts || parts.y < 1900) return null;
+// A YYYY-MM-DD date cell plus an optional time cell, read as Swedish local time, to an
+// ISO string; null if there's no valid date.
+function cellDate(value, time) {
+  const m = cellText(value).match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+  if (!m || +m[1] < 1900) return null;
+  const parts = { y: +m[1], mo: +m[2], d: +m[3], h: +(m[4] ?? 0), mi: +(m[5] ?? 0) };
   const t = cellText(time) ? timeParts(time) : null;
   if (t) Object.assign(parts, t);
   const date = new Date(parts.y, parts.mo - 1, parts.d, parts.h, parts.mi);
@@ -220,7 +120,7 @@ function byDateDesc(a, b) {
 
 // Returns { entries, noDate } or null if no header row is found. Rows without a name, or with
 // just "-" (a day without a pick in the old spreadsheets), are skipped.
-function historyFromRows(rows, date1904 = false) {
+function historyFromRows(rows) {
   const h = findHeader(rows);
   if (!h) return null;
   const entries = [];
@@ -233,7 +133,7 @@ function historyFromRows(rows, date1904 = false) {
     const mode = modeFromMethod(method);
     if (mode) entry.mode = mode;
     else if (method) entry.method = method.slice(0, 60);
-    entry.date = h.date >= 0 ? cellDate(row[h.date], h.time >= 0 ? row[h.time] : '', date1904) : null;
+    entry.date = h.date >= 0 ? cellDate(row[h.date], h.time >= 0 ? row[h.time] : '') : null;
     if (!entry.date) noDate++;
     entries.push(entry);
   }
@@ -319,10 +219,9 @@ function decodeText(bytes) {
   }
 }
 
-async function readSheets(file) {
+async function readCsvFile(file) {
   const bytes = new Uint8Array(await file.arrayBuffer());
-  if (bytes[0] === 0x50 && bytes[1] === 0x4b) return readXlsx(bytes); // "PK": a zip, so .xlsx
-  return { sheets: [parseCsv(decodeText(bytes)).map(row => row.map(unguardCell))], date1904: false };
+  return parseCsv(decodeText(bytes)).map(row => row.map(unguardCell));
 }
 
 function chooseFile(accept, onFile) {
@@ -362,11 +261,10 @@ function askImportChoice(group, count) {
 
 function importHistory() {
   if (spinning) return;
-  chooseFile('.csv,.xlsx,.txt,text/csv', async file => {
+  chooseFile('.csv,.txt,text/csv', async file => {
     let found;
     try {
-      const { sheets, date1904 } = await readSheets(file);
-      found = sheets.map(rows => historyFromRows(rows, date1904)).find(Boolean);
+      found = historyFromRows(await readCsvFile(file));
     } catch {
       alert('Filen kunde inte läsas.');
       return;

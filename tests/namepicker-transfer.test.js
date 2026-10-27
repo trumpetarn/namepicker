@@ -1,11 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deflateRawSync } from 'node:zlib';
 import { loadScripts, fakeLocalStorage } from './load-scripts.js';
 
 const np = loadScripts(
   ['namepicker/groups.js', 'namepicker/history.js', 'namepicker/transfer.js'],
-  { localStorage: fakeLocalStorage(), Blob, Response, DecompressionStream },
+  { localStorage: fakeLocalStorage() },
 );
 
 // Objects from the scripts come from another vm realm, so compare them as JSON.
@@ -76,20 +75,20 @@ test('mergeHistory drops exact duplicates (to the minute) and sorts newest first
   ]);
 });
 
-// Like the old standup spreadsheets: a count table next to the history, which starts lower
-// down, Excel day numbers as dates and "-" on days without a pick.
+// Like the old standup spreadsheets saved as CSV: a count table next to the history, which
+// starts lower down, and "-" on days without a pick.
 const SPREADSHEET = [
   [],
   ['', 'Länk', 'https://wheelofnames.com/x'],
   [],
   ['', 'Namn', 'Antal'],
-  ['', 'Per', 2],
+  ['', 'Per', '2'],
   ['', 'Date', 'Name', 'Method', 'Chosen but MIA', 'Comment', '', 'Name', 'Count'],
-  ['', 45901, 'Malin', 'Wheel of Names', '', '', '', 'Malin', 1],
-  ['', 45902, '-', '', '', 'Weekend'],
-  ['', 45903, 'Per', 'fjärrkontrollen', 'Bo'],
+  ['', '2025-09-01', 'Malin', 'Wheel of Names', '', '', '', 'Malin', '1'],
+  ['', '2025-09-02', '-', '', '', 'Weekend'],
+  ['', '2025-09-03', 'Per', 'fjärrkontrollen', 'Bo'],
   ['', 'okänt', 'Per', ''],
-  ['', 45904],
+  ['', '2025-09-04'],
 ];
 
 test('historyFromRows reads an old spreadsheet', () => {
@@ -102,68 +101,12 @@ test('historyFromRows reads an old spreadsheet', () => {
   assert.equal(noDate, 1);
 });
 
-test('historyFromRows needs a name column, and Excel dates can carry a time', () => {
-  assert.equal(np.historyFromRows([['Datum', 'Antal'], ['2026-01-01', 3]]), null);
-  const { entries } = np.historyFromRows([['Date', 'Name'], [45901.5, 'Anna']]);
-  assert.equal(entries[0].date, new Date(2025, 8, 1, 12, 0).toISOString());
-  const { entries: e1904 } = np.historyFromRows([['Date', 'Name'], [44439, 'Anna']], true);
-  assert.equal(e1904[0].date, new Date(2025, 8, 1).toISOString(), 'the 1904 date system is 1462 days off');
+test('historyFromRows needs a name column, and reads a time column', () => {
+  assert.equal(np.historyFromRows([['Datum', 'Antal'], ['2026-01-01', '3']]), null);
+  const { entries } = np.historyFromRows([['Datum', 'Tid', 'Namn'], ['2025-09-01', '12.30', 'Anna']]);
+  assert.equal(entries[0].date, new Date(2025, 8, 1, 12, 30).toISOString());
   const { entries: bad } = np.historyFromRows([['Datum', 'Namn'], ['2026-02-30', 'Anna']]);
   assert.equal(bad[0].date, null, 'an impossible date is no date');
-});
-
-// A minimal .xlsx: a zip with the workbook, shared strings and one sheet.
-function zip(files) {
-  const locals = [];
-  const central = [];
-  let offset = 0;
-  for (const [name, text] of Object.entries(files)) {
-    const nameBytes = Buffer.from(name);
-    const raw = Buffer.from(text);
-    const data = deflateRawSync(raw);
-    const local = Buffer.alloc(30);
-    local.writeUInt32LE(0x04034b50, 0);
-    local.writeUInt16LE(8, 8);
-    local.writeUInt32LE(data.length, 18);
-    local.writeUInt32LE(raw.length, 22);
-    local.writeUInt16LE(nameBytes.length, 26);
-    const dir = Buffer.alloc(46);
-    dir.writeUInt32LE(0x02014b50, 0);
-    dir.writeUInt16LE(8, 10);
-    dir.writeUInt32LE(data.length, 20);
-    dir.writeUInt32LE(raw.length, 24);
-    dir.writeUInt16LE(nameBytes.length, 28);
-    dir.writeUInt32LE(offset, 42);
-    locals.push(local, nameBytes, data);
-    central.push(dir, nameBytes);
-    offset += local.length + nameBytes.length + data.length;
-  }
-  const dirSize = central.reduce((n, b) => n + b.length, 0);
-  const end = Buffer.alloc(22);
-  end.writeUInt32LE(0x06054b50, 0);
-  end.writeUInt16LE(central.length / 2, 8);
-  end.writeUInt16LE(central.length / 2, 10);
-  end.writeUInt32LE(dirSize, 12);
-  end.writeUInt32LE(offset, 16);
-  return new Uint8Array(Buffer.concat([...locals, ...central, end]));
-}
-
-test('readXlsx reads cells from shared strings, inline strings and numbers', async () => {
-  const xlsx = zip({
-    'xl/workbook.xml': '<workbook><workbookPr/><sheets><sheet name="Data"/></sheets></workbook>',
-    'xl/sharedStrings.xml': '<sst><si><t>Date</t></si><si><t>Name</t></si><si><r><t>Må</t></r><r><t xml:space="preserve">ns &amp; Co</t></r><rPh><t>x</t></rPh></si></sst>',
-    'xl/worksheets/sheet1.xml': '<worksheet><sheetData>' +
-      '<row r="2"><c r="B2" t="s"><v>0</v></c><c r="C2" t="s"><v>1</v></c><c r="D2" t="inlineStr"><is><t>Method</t></is></c></row>' +
-      '<row r="3"><c r="B3" s="4"><v>45901</v></c><c r="C3" t="s"><v>2</v></c><c r="D3" t="str"><f>"Hatten"</f><v>Hatten</v></c></row>' +
-      '<row r="4"><c r="B4" s="4"/></row>' +
-      '</sheetData></worksheet>',
-  });
-  const { sheets, date1904 } = await np.readXlsx(xlsx);
-  assert.equal(date1904, false);
-  assert.deepEqual(plain(sheets[0][2]), [null, 45901, 'Måns & Co', 'Hatten']);
-  assert.deepEqual(plain(np.historyFromRows(sheets[0]).entries), [
-    { name: 'Måns & Co', mode: 'hat', date: new Date(2025, 8, 1).toISOString() },
-  ]);
 });
 
 test('a group file survives export and import', () => {
