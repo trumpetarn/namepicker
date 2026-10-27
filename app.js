@@ -46,6 +46,7 @@ function setSpinning(on) {
   modeBtns.forEach(b => b.disabled = on);
   updateGroupControls();
   renderMethodSettings();
+  renderHistory(); // its exclude buttons are off during a draw
 }
 
 // --- Slumpa metod ---
@@ -150,7 +151,7 @@ function land(winner, usedMode) {
   chosen.textContent = winner;
   chosen.className = 'landing visible';
   setSpinning(false);
-  addToHistory(winner, usedMode);
+  offerUndo(addToHistory(winner, usedMode));
   showSpotlight(winner);
   launchConfetti();
   playFanfare();
@@ -161,6 +162,7 @@ function pickName(velocity) {
   if (spinning) return;
   const names = getNames();
   if (names.length === 0) return;
+  hideUndo();
 
   const winnerIdx = randomInt(names.length);
   const winner = names[winnerIdx];

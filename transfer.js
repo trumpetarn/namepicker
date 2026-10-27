@@ -136,6 +136,7 @@ function cleanEntry(e) {
   else if (typeof e.method === 'string' && e.method.trim()) entry.method = e.method.trim().slice(0, 60);
   const t = typeof e.date === 'string' ? Date.parse(e.date) : NaN;
   entry.date = Number.isFinite(t) ? new Date(t).toISOString() : null;
+  if (e.excluded === true) entry.excluded = true;
   return entry;
 }
 

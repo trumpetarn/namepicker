@@ -81,6 +81,7 @@ function showActiveGroup() {
   updatePickEnabled();
   chosen.className = '';
   chosen.textContent = '';
+  hideUndo();
   reelPos = 0;
   resetHat();
   updateToggleLabel();

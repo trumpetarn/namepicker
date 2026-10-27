@@ -922,16 +922,78 @@ main.can-pick #hat:hover {
   flex-shrink: 0;
 }
 
+/* Uteslutna val: kvar i listan, men räknas inte */
+#history li.excluded .hist-name,
+#history li.excluded .hist-mode,
+#history li.excluded .hist-date {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+#history li .hist-exclude {
+  flex-shrink: 0;
+  background: none;
+  color: var(--dim);
+  padding: 0 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+#history li .hist-exclude:hover,
+#history li .hist-exclude:focus-visible {
+  background: none;
+  color: var(--fg);
+}
+
+#history li .hist-exclude:disabled {
+  background: none;
+  color: var(--border);
+}
+
+#result span.excluded {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+/* Ångra efter en dragning */
+#undo-pick {
+  align-self: center;
+  margin-top: -1rem;
+  background: none;
+  color: var(--subtle);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+#undo-pick:hover {
+  background: var(--surface);
+  color: var(--fg);
+}
+
+#undo-pick[hidden] {
+  display: none;
+}
+
 /* Narrow: method and date go on a small line under the name, which gets the full width */
 @container (max-width: 420px) {
   #history li {
     display: grid;
-    grid-template-columns: 1.5rem 1fr auto;
+    grid-template-columns: 1.5rem 1fr auto auto;
     column-gap: 0.75rem;
   }
 
   #history li .hist-name {
-    grid-column: 2 / -1;
+    grid-column: 2 / 4;
+  }
+
+  #history li .hist-exclude {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    align-self: center;
   }
 
   #history li .hist-mode {

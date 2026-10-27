@@ -143,3 +143,31 @@ test('parseGroupFile cleans what it imports', () => {
   assert.equal(np.parseGroupFile(JSON.stringify({ ...base, modes: ['laser'] })).modes, undefined, 'none valid: all on');
   assert.equal(np.parseGroupFile(JSON.stringify({ ...base, modes: ['wheel', 'hat', 'slot', 'remote'] })).modes, undefined);
 });
+
+test('excluded entries stay out of the CSV but travel in the group file', () => {
+  const group = {
+    name: 'G',
+    names: 'Anna\nBo',
+    history: [
+      { name: 'Anna', mode: 'wheel', date: '2026-10-26T13:05:00.000Z', excluded: true },
+      { name: 'Bo', mode: 'hat', date: '2026-10-26T12:00:00.000Z' },
+    ],
+  };
+  assert.deepEqual(plain(np.includedEntries(group.history)).map(e => e.name), ['Bo']);
+  assert.deepEqual(plain(np.historyFromCsv(np.historyCsv(group))).map(e => e.name), ['Bo']);
+  assert.deepEqual(plain(np.parseGroupFile(np.groupFile(group)).history), group.history);
+});
+
+test('only excluded: true is kept from a group file', () => {
+  const file = history => np.parseGroupFile(JSON.stringify({ format: 'namnvaljare-grupp', version: 1, name: 'G', names: [], history }));
+  const history = file([{ name: 'A', excluded: 'yes' }, { name: 'B', excluded: 1 }, { name: 'C', excluded: true }]).history;
+  assert.deepEqual(plain(history).map(e => [e.name, e.excluded]), [['A', undefined], ['B', undefined], ['C', true]]);
+});
+
+test('merging keeps an existing entry, and whether it is excluded', () => {
+  const date = '2026-10-26T13:05:00.000Z';
+  const existing = [{ name: 'Anna', mode: 'wheel', date, excluded: true }];
+  const { history, duplicates } = np.mergeHistory(existing, [{ name: 'Anna', mode: 'wheel', date }]);
+  assert.equal(duplicates, 1);
+  assert.deepEqual(plain(history), existing);
+});
