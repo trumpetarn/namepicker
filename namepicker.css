@@ -35,6 +35,7 @@
   --rule: #222;
   --secondary: #999;
   --bright: #ccc;
+  --series-1: #3987e5;    /* statistics bars; checked against each theme's --bg */
   --accent-bg: #fff;      /* main button, selected method */
   --accent-fg: #111;
   --accent-hover: #ddd;
@@ -58,6 +59,7 @@
   --rule: #e6e6e2;
   --secondary: #555;
   --bright: #222;
+  --series-1: #2a78d6;
   --accent-bg: #111;
   --accent-fg: #fff;
   --accent-hover: #333;
@@ -82,6 +84,7 @@
   --rule: #f9d0da;
   --secondary: #7b4fa0;
   --bright: #1d1a5e;
+  --series-1: #2a78d6;
   --accent-bg: #e53935;
   --accent-fg: #fff;
   --accent-hover: #ff7043;
@@ -955,6 +958,152 @@ main.can-pick #hat:hover {
 #result span.excluded {
   text-decoration: line-through;
   opacity: 0.45;
+}
+
+#toggle-stats[aria-pressed="true"] {
+  color: var(--fg);
+}
+
+/* Statistik: samma rubrik som historiken, i stället för listan */
+#history-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+#history-stats[hidden] {
+  display: none;
+}
+
+#stats-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--faint);
+}
+
+#stats-controls select {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+#stats-summary {
+  color: var(--muted);
+}
+
+#stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+#history-stats caption {
+  text-align: left;
+  padding-bottom: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.stat-bars {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.stat-bars th {
+  width: 35%;
+  padding: 0.2rem 0.75rem 0.2rem 0;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Thin bars, square at the baseline and rounded at the value end */
+.bar {
+  height: 10px;
+  background: var(--series-1);
+  border-radius: 0 4px 4px 0;
+}
+
+.bar-value {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-matrix-wrap {
+  overflow-x: auto;
+}
+
+.stat-matrix {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-matrix th,
+.stat-matrix td {
+  padding: 0.25rem 0.6rem;
+  text-align: right;
+  font-weight: 300;
+  white-space: nowrap;
+}
+
+.stat-matrix thead th {
+  font-size: 0.7rem;
+  color: var(--faint);
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-matrix th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.stat-matrix tbody th {
+  color: var(--text-soft);
+}
+
+.stat-matrix td {
+  color: var(--fg);
+}
+
+.stat-matrix td.zero {
+  color: var(--dim);
+}
+
+.stat-matrix td:last-child,
+.stat-matrix thead th:last-child {
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Ångra efter en dragning */

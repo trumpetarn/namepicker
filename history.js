@@ -40,9 +40,14 @@ function renderHistory() {
   const toggle = document.getElementById('toggle-history');
   toggle.textContent = hidden ? `Historik (${history.length})` : 'Historik';
   toggle.setAttribute('aria-expanded', String(!hidden));
-  list.hidden = hidden;
+  // The list or the statistics (stats.js), under the same heading
+  const statsBtn = document.getElementById('toggle-stats');
+  statsBtn.setAttribute('aria-pressed', String(statsShown));
+  document.getElementById('history-stats').hidden = hidden || !statsShown;
+  if (!hidden && statsShown) renderStats();
+  list.hidden = hidden || statsShown;
   const shown = historyShowAll ? history : history.slice(0, HISTORY_SHOWN);
-  more.hidden = hidden || history.length <= HISTORY_SHOWN;
+  more.hidden = list.hidden || history.length <= HISTORY_SHOWN;
   more.textContent = historyShowAll ? 'Visa färre' : `Visa alla ${history.length}`;
   // Built with textContent: names can come from someone else's share link or file.
   list.replaceChildren(...shown.map((entry, i) => {
