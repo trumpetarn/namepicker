@@ -92,7 +92,7 @@ function barTable(caption, header, items, total) {
     const cell = statsEl('td');
     const wrap = statsEl('div', 'bar-cell');
     const bar = statsEl('span', 'bar');
-    bar.style.width = `${(count / max) * 100}%`;
+    bar.style.setProperty('--ratio', String(count / max));
     bar.setAttribute('aria-hidden', 'true');
     const value = statsEl('span', 'bar-value', count ? `${count} · ${percent(count, total)}` : '0');
     wrap.append(bar, value);

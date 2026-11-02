@@ -1031,7 +1031,10 @@ main.can-pick #hat:hover {
   text-overflow: ellipsis;
 }
 
+/* Room kept for the value label (gap + up to "100 · 100 %"), so every bar is
+   scaled against the same width whatever its label's length. */
 .bar-cell {
+  --bar-label: 6rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1039,6 +1042,8 @@ main.can-pick #hat:hover {
 
 /* Thin bars, square at the baseline and rounded at the value end */
 .bar {
+  flex-shrink: 0;
+  width: calc((100% - var(--bar-label)) * var(--ratio, 0));
   height: 10px;
   background: var(--series-1);
   border-radius: 0 4px 4px 0;
