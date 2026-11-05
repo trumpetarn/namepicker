@@ -262,3 +262,7 @@ importFromHash();
 setMode(mode);
 showActiveGroup();
 setNamesHidden(localStorage.getItem(NAMES_HIDDEN_KEY) === '1');
+
+// Installable and usable offline (sw.js). updateViaCache: the host caches .js for
+// 30 days, but sw.js must be checked for a new version on every visit.
+navigator.serviceWorker?.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
