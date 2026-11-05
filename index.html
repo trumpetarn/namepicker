@@ -3,11 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <script>
-    // Apply the saved colour mode before anything renders (theme.js handles switching).
+    // Clown mode (the namepicker's own, on top of the site theme) before anything renders;
+    // theme.js handles switching. The old namepicker-theme moves to site-theme once.
     try {
-      const t = localStorage.getItem('namepicker-theme');
-      if (['light', 'clown'].includes(t)) document.documentElement.dataset.theme = t;
+      const old = localStorage.getItem('namepicker-theme');
+      if (old === 'clown') localStorage.setItem('namepicker-clown', '1');
+      else if (old && !localStorage.getItem('site-theme')) localStorage.setItem('site-theme', old);
+      localStorage.removeItem('namepicker-theme');
+      if (localStorage.getItem('namepicker-clown') === '1') document.documentElement.dataset.clown = '';
     } catch {}
+  </script>
+  <script>
+    // Site theme: Mörkt or Ljust as data-theme on <html> before anything renders, from
+    // the menu's Tema (localStorage site-theme), or the system's setting on Auto.
+    // The same block is inlined on every page.
+    {
+      const root = document.documentElement;
+      const systemLight = matchMedia('(prefers-color-scheme: light)');
+      const applyTheme = () => {
+        let saved = null;
+        try { saved = localStorage.getItem('site-theme'); } catch {}
+        root.dataset.theme = saved === 'light' || saved === 'dark' ? saved : systemLight.matches ? 'light' : 'dark';
+      };
+      applyTheme();
+      systemLight.addEventListener('change', applyTheme);
+      addEventListener('storage', (e) => { if (e.key === 'site-theme') applyTheme(); });
+      addEventListener('site-theme', applyTheme);
+    }
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -26,6 +48,24 @@
       --bright: #ccc;        /* hovered secondary text */
       --fg: #fff;
       --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+    }
+
+    /* Ljust, set as data-theme by the site theme script below. */
+    :root[data-theme="light"] {
+      --bg: #f6f6f4;
+      --surface: #fff;
+      --rule: #e6e6e2;
+      --border: #d4d4d0;
+      --dim: #bdbdb8;
+      --faint: #8f8f8f;
+      --subtle: #777;
+      --muted: #6b6b6b;
+      --secondary: #555;
+      --text-soft: #444;
+      --bright: #222;
+      --fg: #111;
+      color-scheme: light;
     }
 
     /* Site menu: the same block is inlined on every page. */
@@ -87,6 +127,38 @@
     .site-menu a[aria-current="page"] {
       color: var(--fg);
     }
+
+    .site-menu .site-theme {
+      display: flex;
+      gap: 0.6rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid var(--rule);
+    }
+
+    .site-menu .site-theme button {
+      background: none;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      color: var(--secondary);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+
+    .site-menu .site-theme button:hover,
+    .site-menu .site-theme button[aria-pressed="true"] {
+      background: none;
+      color: var(--fg);
+    }
+
+    .site-menu .site-theme button[aria-pressed="true"] {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
   </style>
   <title>Namnväljare – Jakob Markgren</title>
   <meta name="description" content="Slumpa vem som är på tur, med lyckohjul, hatt, enarmad bandit eller fjärrkontroll. Har du fått en länk innehåller den en delad namnlista.">
@@ -116,12 +188,35 @@
       <li><a href="/dashboard/">Dashboard</a></li>
       <li><a href="/clock/">Klocka</a></li>
       <li><a href="/weather/">Väder</a></li>
+      <li class="site-theme" role="group" aria-label="Tema">
+        <button type="button" data-site-theme="auto">Auto</button>
+        <button type="button" data-site-theme="dark">Mörkt</button>
+        <button type="button" data-site-theme="light">Ljust</button>
+      </li>
     </ul>
   </details>
   <script>
-    // Close the site menu on a click outside it or on Escape.
+    // Close the site menu on a click outside it or on Escape. Its Tema buttons save the
+    // site theme (none = Auto) and tell the site theme script in <head> to apply it.
     {
       const siteMenu = document.querySelector('.site-menu');
+      const themeButtons = siteMenu.querySelectorAll('[data-site-theme]');
+      const showThemeChoice = () => {
+        let saved = null;
+        try { saved = localStorage.getItem('site-theme'); } catch {}
+        const choice = saved === 'light' || saved === 'dark' ? saved : 'auto';
+        themeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.siteTheme === choice)));
+      };
+      themeButtons.forEach((b) => b.addEventListener('click', () => {
+        try {
+          if (b.dataset.siteTheme === 'auto') localStorage.removeItem('site-theme');
+          else localStorage.setItem('site-theme', b.dataset.siteTheme);
+        } catch {}
+        dispatchEvent(new Event('site-theme'));
+        showThemeChoice();
+      }));
+      siteMenu.addEventListener('toggle', showThemeChoice);
+      showThemeChoice();
       document.addEventListener('click', (e) => {
         if (siteMenu.open && !siteMenu.contains(e.target)) siteMenu.open = false;
       });

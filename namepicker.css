@@ -16,9 +16,11 @@
   font-display: swap;
 }
 
-/* Färglägen: set as data-theme on <html> (by an inline script in <head>, so the page
-   never flashes the wrong one) and switched by theme.js. The wheel and the remote read
-   these variables too. Objects like the hat's slips and the lever keep their colours. */
+/* Färglägen: Mörkt and Ljust are the site theme, data-theme on <html> (set by the site
+   theme script in <head>, so the page never flashes the wrong one); their site variables
+   must equal the site theme block. Clown is the namepicker's own, data-clown on top of
+   it. Switched by theme.js. The wheel and the remote read these variables too. Objects
+   like the hat's slips and the lever keep their colours. */
 :root {
   color-scheme: dark;
   --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -69,7 +71,7 @@
   --lever-mount-border: #c4c4bf;
 }
 
-:root[data-theme="clown"] {
+:root[data-clown] {
   color-scheme: light;
   --font: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Marker Felt", cursive;
   --bg: #fff6d5;
@@ -1255,14 +1257,17 @@ main.can-pick #hat:hover {
 
 /* Sajtmenyn är samma på alla sidor; här följer den färgläget */
 .site-menu summary,
-.site-menu a {
+.site-menu a,
+.site-menu .site-theme button {
   color: var(--muted);
 }
 
 .site-menu summary:hover,
 .site-menu[open] summary,
 .site-menu a:hover,
-.site-menu a[aria-current="page"] {
+.site-menu a[aria-current="page"],
+.site-menu .site-theme button:hover,
+.site-menu .site-theme button[aria-pressed="true"] {
   color: var(--fg);
 }
 
@@ -1272,7 +1277,7 @@ main.can-pick #hat:hover {
 }
 
 /* Clownläge: prickar, regnbåge och lite gung */
-:root[data-theme="clown"] body {
+:root[data-clown] body {
   background-image:
     radial-gradient(rgba(229, 57, 53, 0.22) 14%, transparent 15%),
     radial-gradient(rgba(41, 121, 255, 0.2) 14%, transparent 15%),
@@ -1282,15 +1287,15 @@ main.can-pick #hat:hover {
   background-attachment: fixed;
 }
 
-:root[data-theme="clown"] main {
+:root[data-clown] main {
   background: rgba(255, 246, 213, 0.92);
   border: 3px dashed #e53935;
   border-radius: 20px;
   padding: 1.5rem;
 }
 
-:root[data-theme="clown"] h1,
-:root[data-theme="clown"] #spotlight-name {
+:root[data-clown] h1,
+:root[data-clown] #spotlight-name {
   background: linear-gradient(90deg, #e53935, #fb8c00, #fdd835, #43a047, #1e88e5, #8e24aa);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1298,27 +1303,27 @@ main.can-pick #hat:hover {
   text-shadow: none;
 }
 
-:root[data-theme="clown"] h1 {
+:root[data-clown] h1 {
   font-weight: 700;
   animation: clown-wobble 2.4s ease-in-out infinite;
 }
 
-:root[data-theme="clown"] #spotlight-name {
+:root[data-clown] #spotlight-name {
   font-weight: 700;
 }
 
-:root[data-theme="clown"] #pick-btn {
+:root[data-clown] #pick-btn {
   border-radius: 999px;
   font-weight: 700;
   box-shadow: 0 4px 0 #8e1b18;
 }
 
-:root[data-theme="clown"] #pick-btn:active:not(:disabled) {
+:root[data-clown] #pick-btn:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 #8e1b18;
 }
 
-:root[data-theme="clown"] #result span {
+:root[data-clown] #result span {
   color: #e53935;
   font-weight: 700;
 }
@@ -1329,7 +1334,7 @@ main.can-pick #hat:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root[data-theme="clown"] h1 { animation: none; }
+  :root[data-clown] h1 { animation: none; }
 }
 
 /* Små telefoner: mindre marginaler, så innehållet får plats */
@@ -1338,7 +1343,7 @@ main.can-pick #hat:hover {
     padding: 2.25rem 1rem 1.5rem;
   }
 
-  :root[data-theme="clown"] main {
+  :root[data-clown] main {
     padding: 1rem 0.85rem;
   }
 }
