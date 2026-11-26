@@ -6,7 +6,9 @@ function launchConfetti() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#ffffff'];
+  // Jul: the wheel's red, green, gold and snow instead
+  const colors = currentTheme() === 'christmas' ? [...CHRISTMAS_COLORS, '#ffffff']
+    : ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#ffffff'];
   const particles = Array.from({ length: 160 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * -canvas.height * 0.6,
@@ -148,5 +150,13 @@ function playFanfare() {
   if (currentTheme() === 'clown') {
     note(420, 1.0, 0.16, 0.12, 'sawtooth', 300);
     note(420, 1.22, 0.24, 0.12, 'sawtooth', 280);
+  }
+
+  // Jul: bjällror efter fanfaren, two quick shakes of short high pings
+  if (currentTheme() === 'christmas') {
+    [1.0, 1.06, 1.12, 1.4, 1.46, 1.52].forEach((t, i) => {
+      note(2637 + (i % 3) * 180, t, 0.09, 0.05, 'sine');
+      note(3520 + (i % 2) * 220, t + 0.015, 0.07, 0.035, 'sine');
+    });
   }
 }

@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <script>
-    // Clown mode (the namepicker's own, on top of the site theme) before anything renders;
-    // theme.js handles switching. The old namepicker-theme moves to site-theme once.
+    // Clown or Jul (the namepicker's own modes, on top of the site theme) before anything
+    // renders; theme.js handles switching. The old namepicker-theme moves to site-theme once.
     try {
       const old = localStorage.getItem('namepicker-theme');
       if (old === 'clown') localStorage.setItem('namepicker-clown', '1');
       else if (old && !localStorage.getItem('site-theme')) localStorage.setItem('site-theme', old);
       localStorage.removeItem('namepicker-theme');
       if (localStorage.getItem('namepicker-clown') === '1') document.documentElement.dataset.clown = '';
+      else if (localStorage.getItem('namepicker-christmas') === '1') document.documentElement.dataset.christmas = '';
     } catch {}
   </script>
   <script>
@@ -229,11 +230,13 @@
       });
     }
   </script>
+  <canvas id="snow-canvas" hidden aria-hidden="true"></canvas>
   <canvas id="confetti-canvas"></canvas>
   <div id="theme-switch" role="group" aria-label="Färgläge">
     <button type="button" data-theme="dark">Mörkt</button>
     <button type="button" data-theme="light">Ljust</button>
     <button type="button" data-theme="clown">Clown</button>
+    <button type="button" data-theme="christmas">Jul</button>
   </div>
   <div id="spotlight" hidden aria-hidden="true"><span id="spotlight-name"></span></div>
   <main>
@@ -351,6 +354,7 @@
   <script src="js/random.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/effects.js"></script>
+  <script src="js/snow.js"></script>
   <script src="js/groups.js"></script>
   <script src="js/history.js"></script>
   <script src="js/stats.js"></script>

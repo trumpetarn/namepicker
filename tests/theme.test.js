@@ -23,6 +23,7 @@ test("namepicker.css's Mörkt and Ljust match the site theme", () => {
     default: variables(css.match(/^:root \{[\s\S]*?^\}/m)[0]),
     light: variables(css.match(/^:root\[data-theme="light"\] \{[\s\S]*?^\}/m)[0]),
     clown: variables(css.match(/^:root\[data-clown\] \{[\s\S]*?^\}/m)[0]),
+    christmas: variables(css.match(/^:root\[data-christmas\] \{[\s\S]*?^\}/m)[0]),
   };
   for (const [name, value] of Object.entries(site)) {
     assert.equal(themes.default[name], value, `namepicker.css :root --${name}`);
@@ -31,6 +32,23 @@ test("namepicker.css's Mörkt and Ljust match the site theme", () => {
     if (name !== 'font') {
       assert.ok(themes.light[name], `namepicker.css light theme is missing --${name}`);
       assert.ok(themes.clown[name], `namepicker.css clown theme is missing --${name}`);
+      assert.ok(themes.christmas[name], `namepicker.css christmas theme is missing --${name}`);
     }
+  }
+});
+
+// Clown and Jul: theme.js's OWN_THEMES, each with a button, a colour block and a line in
+// the <head> script that applies it before the page renders.
+test('each of the namepicker\'s own colour modes is wired up everywhere', () => {
+  const themeJs = readFileSync(ROOT + 'js/theme.js', 'utf8');
+  const own = [...themeJs.matchAll(/^ {2}(\w+): \{ attr: '([\w-]+)', key: '([\w-]+)' \},$/gm)]
+    .map(([, name, attr, key]) => ({ name, attr, key }));
+  assert.deepEqual(own.map(t => t.name), ['clown', 'christmas']);
+  const head = html.slice(0, html.indexOf('</head>'));
+  for (const { name, attr, key } of own) {
+    assert.match(html, new RegExp(`<button type="button" data-theme="${name}">`), `no ${name} button`);
+    assert.match(css, new RegExp(`^:root\\[data-${attr}\\] \\{`, 'm'), `no :root[data-${attr}] block`);
+    assert.ok(head.includes(`localStorage.getItem('${key}') === '1'`) && head.includes(`dataset.${attr} = ''`),
+      `the <head> script doesn't apply ${name}`);
   }
 });

@@ -30,8 +30,9 @@ js/                   the page's scripts, loaded in the order index.html lists t
   stats.js              statistics over the history
   share.js              share links
   transfer.js           importing and exporting files
-  theme.js              the colour themes (dark, light, clown)
+  theme.js              the colour themes (dark, light, clown, Christmas)
   effects.js            the winner's spotlight, confetti and sounds
+  snow.js               the snow in the Christmas theme
   app.js                ties it together: buttons, the draw, start-up
   draws/                the four draw animations
     wheel.js              spinning wheel

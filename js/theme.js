@@ -1,17 +1,23 @@
 // Färglägen: Mörkt and Ljust are the site theme (data-theme on <html>, localStorage
-// site-theme, also set from the site menu's Tema); Clown is the namepicker's own, as
-// data-clown on top of it. The inline scripts in <head> have applied both before render;
-// this wires up the switcher and gives the canvases (wheel, remote) the current colours,
-// which live as CSS variables in namepicker.css.
+// site-theme, also set from the site menu's Tema). Clown and Jul are the namepicker's
+// own, as data-clown or data-christmas on top of it (at most one of them). The inline
+// scripts in <head> have applied them before render; this wires up the switcher and
+// gives the canvases (wheel, remote) the current colours, which live as CSS variables
+// in namepicker.css. snow.js watches data-christmas by itself.
 
-const CLOWN_KEY = 'namepicker-clown';
+// The namepicker's own modes: the button's data-theme, its <html> data attribute and
+// its localStorage key.
+const OWN_THEMES = {
+  clown: { attr: 'clown', key: 'namepicker-clown' },
+  christmas: { attr: 'christmas', key: 'namepicker-christmas' },
+};
 const themeButtons = /** @type {NodeListOf<HTMLButtonElement>} */ (document.querySelectorAll('#theme-switch button'));
 // Read by the canvas code; refreshed whenever the theme changes.
 const themeColors = { bg: '', fg: '', surface: '', border: '', muted: '', faint: '', dim: '', font: '' };
 
 function currentTheme() {
   const root = document.documentElement;
-  if ('clown' in root.dataset) return 'clown';
+  for (const [name, { attr }] of Object.entries(OWN_THEMES)) if (attr in root.dataset) return name;
   return root.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
@@ -26,32 +32,36 @@ function showTheme() {
   readThemeColors();
 }
 
-function setClown(on) {
-  if (on) document.documentElement.dataset.clown = '';
-  else delete document.documentElement.dataset.clown;
-  try {
-    if (on) localStorage.setItem(CLOWN_KEY, '1');
-    else localStorage.removeItem(CLOWN_KEY);
-  } catch {}
+// Turns on one of the namepicker's own modes (or none, with null) and saves it.
+function setOwnTheme(name) {
+  for (const [own, { attr, key }] of Object.entries(OWN_THEMES)) {
+    const on = own === name;
+    if (on) document.documentElement.dataset[attr] = '';
+    else delete document.documentElement.dataset[attr];
+    try {
+      if (on) localStorage.setItem(key, '1');
+      else localStorage.removeItem(key);
+    } catch {}
+  }
 }
 
 // Mörkt and Ljust are saved as the site theme, like the site menu does.
 function setTheme(t) {
-  setClown(t === 'clown');
-  if (t === 'clown') return;
+  if (t in OWN_THEMES) return setOwnTheme(t);
+  setOwnTheme(null);
   try { localStorage.setItem('site-theme', t); } catch {}
   dispatchEvent(new Event('site-theme'));
 }
 
 themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
-// Picking Auto, Mörkt or Ljust in the site menu leaves clown mode.
-addEventListener('site-theme', () => setClown(false));
+// Picking Auto, Mörkt or Ljust in the site menu leaves Clown and Jul.
+addEventListener('site-theme', () => setOwnTheme(null));
 // Whatever changed the theme (the switcher, the site menu, the system's setting on
 // Auto, another tab), show it and redraw the canvases.
 new MutationObserver(() => {
   showTheme();
   refreshStage();
-}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-clown'] });
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-clown', 'data-christmas'] });
 showTheme();
 // Clown mode may fall back to the Comic Neue web font; redraw the canvases once it has loaded.
 document.fonts?.addEventListener('loadingdone', () => refreshStage());
