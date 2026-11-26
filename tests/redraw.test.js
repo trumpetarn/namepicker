@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadScripts, fakeLocalStorage } from './load-scripts.js';
 
 const { excludeIfRedraw } = loadScripts(
-  ['groups.js', 'history.js'],
+  ['js/groups.js', 'js/history.js'],
   { localStorage: fakeLocalStorage() },
 );
 

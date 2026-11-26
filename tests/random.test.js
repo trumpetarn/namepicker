@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadScripts } from './load-scripts.js';
 
-const { randomInt } = loadScripts(['random.js']);
+const { randomInt } = loadScripts(['js/random.js']);
 
 test('randomInt stays within [0, n)', () => {
   for (const n of [1, 2, 3, 7, 10, 1000, 2 ** 31 + 1]) {
@@ -34,7 +34,7 @@ test('randomInt redraws values in the uneven tail of the 32-bit range', () => {
   // With n = 3, 2^32 % 3 = 1, so only 2^32 - 1 (0xffffffff) must be redrawn.
   const values = [0xffffffff, 0xffffffff, 5];
   const fakeCrypto = { getRandomValues: buf => { buf[0] = values.shift(); return buf; } };
-  const { randomInt: rigged } = loadScripts(['random.js'], { crypto: fakeCrypto });
+  const { randomInt: rigged } = loadScripts(['js/random.js'], { crypto: fakeCrypto });
   assert.equal(rigged(3), 5 % 3);
   assert.equal(values.length, 0);
 });

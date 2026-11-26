@@ -12,7 +12,7 @@ function loadRemote() {
   // the next frame from inside the current one, so record before calling back.
   const frames = [];
   const canvas = { clientWidth: 0, addEventListener() {} };
-  const ctx = loadScripts(['wheel.js', 'remote.js'], {
+  const ctx = loadScripts(['js/draws/wheel.js', 'js/draws/remote.js'], {
     document: { getElementById: () => canvas },
     performance: { now: () => now },
     requestAnimationFrame: cb => {

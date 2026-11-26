@@ -14,11 +14,17 @@ The namepicker ("Namnväljare") of [jakobmarkgren.se](https://jakobmarkgren.se),
 - At deploy, the site's `scripts/version-assets.js` rewrites each local CSS/JS link to `?v=<content hash>`, because the host caches static files for 30 days. Commit plain links (`href="namepicker.css"`), never `?v=`. That the service worker also caches the versioned links is tested in the site repo, which owns that script.
 - The site menu (top-left `<details class="site-menu">`, its `<style>` and closing `<script>`) and the site theme block (`/* Site theme */` `:root` variables and the first `<script>` in `<head>`) are identical on every page of the site, and the site repo's tests compare them, so don't edit them here. `tests/theme.test.js` checks that `namepicker.css`'s Mörkt and Ljust match the site theme block in `index.html`, so a broken theme fails here and not only when the site bumps the submodule.
 
+## Layout
+
+- The root holds only what has to be there: `index.html` (the page, served at `/namepicker/`), `namepicker.css`, `manifest.webmanifest`, `sw.js` (its scope is its folder), and the tools' config files.
+- `js/` holds the page's scripts, with the draw animations in `js/draws/`. `assets/` holds files the page loads that aren't code: `icons/`, `fonts/` and `og.png`.
+- `scripts/` holds tools that aren't deployed (`images.py`), `tests/` the node:test suites, and `tsconfig/` the type-check projects.
+
 ## Commands
 
 ```sh
-python3 -m http.server 8000   # or pnpm serve; open http://localhost:8000/
 pnpm install
+pnpm serve          # python3 -m http.server 8000; open http://localhost:8000/
 pnpm check          # all of the below
 pnpm lint           # ESLint (eslint.config.js), incl. inline <script>s in index.html
 pnpm typecheck      # tsc --checkJs: tsconfig/app.json (the page), tsconfig/sw.json (the service worker)
@@ -33,19 +39,19 @@ pnpm test           # node:test, tests/*.test.js
 
 ## Images
 
-`scripts/images.py` (Pillow; not deployed) draws `og.png`, the 1200×630 link preview the page's `og:image` points at (`https://jakobmarkgren.se/namepicker/og.png`), and the app icons in `icons/`. The PNGs are committed. Run `python3 scripts/images.py [--font <ttf>]` after changing the look; the default font is Ubuntu Sans. The host and preview services cache images for 30 days, so give a changed image a new file name and update its references (`og:image`, `manifest.webmanifest`, `sw.js`'s `EXTRA`).
+`scripts/images.py` (Pillow; not deployed) draws `assets/og.png`, the 1200×630 link preview the page's `og:image` points at (`https://jakobmarkgren.se/namepicker/assets/og.png`), and the app icons in `assets/icons/`. The PNGs are committed. Run `python3 scripts/images.py [--font <ttf>]` after changing the look; the default font is Ubuntu Sans. The host and preview services cache images for 30 days, so give a changed image a new file name and update its references (`og:image`, `manifest.webmanifest`, `sw.js`'s `EXTRA`).
 
 ## Architecture
 
 The page follows the site's conventions: dark background, thin white system-font text, uppercase letter-spaced nav, Swedish `lang="sv"` copy, `sv-SE` locale formatting.
 
-`index.html` + `namepicker.css` + plain (non-module) scripts that share globals, loaded in this order:
+`index.html` + `namepicker.css` + plain (non-module) scripts in `js/` that share globals, loaded in this order (the four draw animations are in `js/draws/`):
 
 - `random.js` — `randomInt(n)`, an unbiased `crypto.getRandomValues` pick. Use it for anything that decides a draw's outcome; `Math.random` is only for visual effects.
-- `theme.js` (colour modes), `effects.js` (spotlight, confetti, sounds), `groups.js` (state, tabs, `MODES`/`MODE_NAMES`), `history.js`, `stats.js`, `share.js`, `transfer.js` (file import/export), `wheel.js`, `hat.js`, `slot.js` (reel + lever), `remote.js`.
+- `theme.js` (colour modes), `effects.js` (spotlight, confetti, sounds), `groups.js` (state, tabs, `MODES`/`MODE_NAMES`), `history.js`, `stats.js`, `share.js`, `transfer.js` (file import/export), `wheel.js`, `hat.js`, `slot.js` (reel + lever), `remote.js`; the last four in `js/draws/`.
 - `app.js` last — mode switching, the draw, event wiring, init.
 
-`sw.js` (service worker) and `manifest.webmanifest` aren't page scripts; see **Installable and offline (PWA)** below.
+`sw.js` (service worker) and `manifest.webmanifest` aren't page scripts and stay at the root (`sw.js` must, because a service worker's scope is its own folder); see **Installable and offline (PWA)** below.
 
 **Draws.** The winner is chosen first, then one of four animations is steered to land on it: a canvas spinning wheel (`Lyckohjulet`), a hat draw (`Hatten`), a looping slot-machine reel (`Enarmade banditen`), or a canvas TV remote that spins in a still ring of names and stops pointing at the winner (`Fjärrkontrollen`).
 - The mode buttons use short labels (`Hjulet`, `Hatten`, `Banditen`, `Fjärren`) because the full names don't fit on one row; the full names are in their `title`, in `Metoder` and in the history. The row wraps on very narrow screens, and `main` is a size container, so the row, the group actions and the history adapt via `@container` queries.
@@ -71,9 +77,9 @@ The page follows the site's conventions: dark background, thin white system-font
 - Page colours in `namepicker.css` are CSS variables (`--bg`, `--fg`, `--surface`, `--border`, `--muted`, …) defined per theme at the top. Use those rather than hex values for page chrome; objects like the hat slips, lever and remote body keep fixed colours.
 - The canvases read the variables via `themeColors` from `theme.js`, and a theme change calls `refreshStage()`.
 - The default and light themes' site variables must equal the site theme block's two modes, and each theme also sets the site variables the menu uses (`--rule`, `--secondary`, `--bright`), so the site menu follows the colour mode.
-- Clown mode adds polka dots, a rainbow title/spotlight, Comic Sans (falling back to the bundled Comic Neue in `fonts/`, SIL OFL, for devices without it) and a horn after the fanfare.
+- Clown mode adds polka dots, a rainbow title/spotlight, Comic Sans (falling back to the bundled Comic Neue in `assets/fonts/`, SIL OFL, for devices without it) and a horn after the fanfare.
 
-**Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by `scripts/images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
+**Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `assets/icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by `scripts/images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
 - No version is written in `sw.js`. It reads the page's CSS/JS links out of `index.html`, with whatever `?v=` the deploy gave them, and caches exactly those plus its `EXTRA` list (manifest, icons, fonts). When a new file is needed offline and isn't linked from the HTML, add it to `EXTRA`.
 - The page is fetched **network first**, so a new deploy shows on the next visit with a connection. The cached copy is used offline, or after `NETWORK_WAIT_MS` (4 s) on a bad connection. Each fresh page also caches its new `?v=` assets and drops the old ones. Versioned assets come from the cache first. Unversioned ones (the preview, a local server) come from the network first.
 - `register('sw.js', { updateViaCache: 'none' })` makes browsers check `sw.js` itself on every visit, despite the host's 30-day cache, which `.htaccess` can't change.
