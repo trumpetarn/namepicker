@@ -412,11 +412,13 @@ main.names-hidden #remote-wrap {
   width: 100%;
 }
 
-main.names-hidden #hat-stage.active {
+main.names-hidden #hat-stage.active,
+main.names-hidden #gift-stage.active {
   height: 360px;
 }
 
-main.names-hidden #hat-scene {
+main.names-hidden #hat-scene,
+main.names-hidden #gift-scene {
   transform: scale(1.5);
 }
 
@@ -527,6 +529,7 @@ main.names-hidden #hat-scene {
 /* Hjulet, hatten och spaken går att klicka på som alternativ till knappen */
 main.can-pick #wheel,
 main.can-pick #hat,
+main.can-pick #gift,
 main.can-pick #remote {
   cursor: pointer;
 }
@@ -1412,6 +1415,257 @@ main.can-pick #hat:hover {
 
 :root[data-christmas] #result span {
   color: #f4c542;
+}
+
+/* Julklappen (bara i Jul): paketet skakar, locket flyger av och en lapp stiger upp */
+:root:not([data-christmas]) #mode-switch button[data-mode="gift"] {
+  display: none;
+}
+
+#gift-stage.active {
+  height: 240px;
+  overflow: hidden;
+}
+
+#gift-scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 240px;
+  transform-origin: 50% 100%;
+}
+
+#gift {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 200px;
+  height: 170px;
+  margin-left: -100px;
+  overflow: visible;
+  transform-origin: 50% 100%;
+  z-index: 2;
+}
+
+main.can-pick #gift:hover {
+  transform: rotate(-3deg);
+}
+
+#gift.shaking {
+  animation: gift-hop 0.3s ease-in-out 5;
+}
+
+@keyframes gift-hop {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  30% { transform: translateY(-8px) rotate(-5deg); }
+  70% { transform: translateY(-4px) rotate(5deg); }
+}
+
+.gift-lid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.35s 0.5s;
+}
+
+#gift.open .gift-lid {
+  transform: translate(-46px, -70px) rotate(-24deg);
+  opacity: 0;
+}
+
+/* A gift tag with a hole for the string, rising out of the box */
+#gift-tag {
+  position: absolute;
+  left: 50%;
+  top: 146px;
+  width: 100px;
+  height: 40px;
+  transform: translate(-50%, 0) rotate(-3deg);
+  opacity: 0;
+  background: #fff8e7;
+  color: #111;
+  border: 2px solid #c9971f;
+  border-radius: 4px 14px 14px 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.2s, width 0.45s ease, height 0.45s ease;
+}
+
+#gift-tag::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border: 2px solid #c9971f;
+  border-radius: 50%;
+}
+
+#gift-tag.risen {
+  opacity: 1;
+  transform: translate(-50%, -116px) rotate(2deg);
+}
+
+#gift-tag.open {
+  width: min(280px, 100%);
+  height: 64px;
+  transform: translate(-50%, -116px) rotate(0);
+}
+
+#gift-tag span {
+  max-width: 100%;
+  padding: 0 1rem 0 1.5rem;
+  font-size: 1.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.3s 0.25s;
+}
+
+#gift-tag.open span {
+  opacity: 1;
+}
+
+/* Jul på hjulet: en guldstjärna som visare (kransen ritas av wheel.js) */
+:root[data-christmas] #wheel-pointer {
+  top: -16px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  filter: drop-shadow(0 0 6px rgba(244, 197, 66, 0.8)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Pointing down; the filter on the parent keeps the glow outside the clipped shape */
+:root[data-christmas] #wheel-pointer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#ffe082, #f4c542 60%, #c9971f);
+  clip-path: polygon(50% 100%, 61% 65%, 98% 65%, 68% 43%, 79% 9%, 50% 30%, 21% 9%, 32% 43%, 2% 65%, 39% 65%);
+}
+
+/* Jul på banditen: snö på taket, frost i fönstret, ljusslinga och polkagrisspak */
+.snow-cap,
+.fairy-lights {
+  display: none;
+}
+
+:root[data-christmas] .snow-cap {
+  display: block;
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: -12px;
+  height: 18px;
+  background: #f4f7fb;
+  border-radius: 12px 12px 6px 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Drips: a row of half circles under the edge */
+:root[data-christmas] .snow-cap::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 17px;
+  height: 7px;
+  background: radial-gradient(circle at 50% 0, #f4f7fb 6px, transparent 6.5px) 0 0 / 26px 7px repeat-x;
+}
+
+:root[data-christmas] #reel-window {
+  box-shadow: inset 0 0 18px rgba(219, 230, 241, 0.35);
+}
+
+:root[data-christmas] .fairy-lights {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 12px;
+  height: 16px;
+  /* The wire */
+  background: linear-gradient(#24502a, #24502a) 0 2px / 100% 1px no-repeat;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fairy-lights i {
+  --bulb: #ff5252;
+  width: 7px;
+  height: 10px;
+  border-radius: 50% 50% 45% 45%;
+  background: var(--bulb);
+  box-shadow: 0 0 6px var(--bulb);
+  animation: lights-twinkle 1.6s ease-in-out infinite alternate;
+}
+
+.fairy-lights i:nth-child(4n + 2) { --bulb: #69f0ae; }
+.fairy-lights i:nth-child(4n + 3) { --bulb: #ffd740; }
+.fairy-lights i:nth-child(4n + 4) { --bulb: #40c4ff; }
+.fairy-lights i:nth-child(even) { transform: translateY(3px); animation-delay: -0.8s; }
+
+@keyframes lights-twinkle {
+  from { opacity: 1; }
+  to { opacity: 0.45; }
+}
+
+/* Chasing while the reel spins, all gold for a moment after a win */
+main.drawing .fairy-lights i {
+  animation: lights-chase 0.32s steps(1) infinite;
+}
+
+main.drawing .fairy-lights i:nth-child(even) {
+  animation-delay: -0.16s;
+}
+
+@keyframes lights-chase {
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+main.just-won .fairy-lights i {
+  --bulb: #ffd740;
+  animation: none;
+  opacity: 1;
+}
+
+:root[data-christmas] #lever-arm {
+  background: repeating-linear-gradient(-45deg, #fff 0 5px, #d32f2f 5px 10px);
+  box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-christmas] #lever-knob {
+  background: radial-gradient(circle at 35% 30%, #fff 0 8%, #ff8a80 18%, #c62828 55%, #7f1010);
+}
+
+/* The bauble's cap */
+:root[data-christmas] #lever-knob::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 10px;
+  height: 7px;
+  margin-left: -5px;
+  background: linear-gradient(#ffe082, #c9971f);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fairy-lights i,
+  main.drawing .fairy-lights i {
+    animation: none;
+  }
 }
 
 /* Små telefoner: mindre marginaler, så innehållet får plats */

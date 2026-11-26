@@ -141,7 +141,10 @@ test('parseGroupFile cleans what it imports', () => {
 
   const base = { format: 'namnvaljare-grupp', version: 1, name: 'G', names: [] };
   assert.equal(np.parseGroupFile(JSON.stringify({ ...base, modes: ['laser'] })).modes, undefined, 'none valid: all on');
-  assert.equal(np.parseGroupFile(JSON.stringify({ ...base, modes: ['wheel', 'hat', 'slot', 'remote'] })).modes, undefined);
+  assert.equal(np.parseGroupFile(JSON.stringify({ ...base, modes: ['wheel', 'hat', 'slot', 'remote', 'gift'] })).modes, undefined);
+  // Everything but Julklappen is a real restriction (a group that switched it off)
+  assert.deepEqual(plain(np.parseGroupFile(JSON.stringify({ ...base, modes: ['wheel', 'hat', 'slot', 'remote'] })).modes),
+    ['wheel', 'hat', 'slot', 'remote']);
 });
 
 test('excluded entries stay out of the CSV but travel in the group file', () => {

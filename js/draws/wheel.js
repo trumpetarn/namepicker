@@ -31,7 +31,10 @@ function drawWheel(names) {
   ctx.clearRect(0, 0, size, size);
 
   const c = size / 2;
-  const r = c - 4;
+  // Jul: the slices shrink to make room for a wreath around them
+  const wreath = currentTheme() === 'christmas';
+  const r = wreath ? c * 0.86 : c - 4;
+  if (wreath) drawWreath(ctx, c, r);
 
   if (names.length === 0) {
     ctx.beginPath();
@@ -89,6 +92,70 @@ function drawWheel(names) {
   ctx.strokeStyle = themeColors.fg;
   ctx.lineWidth = 2;
   ctx.stroke();
+}
+
+// Jul: a fir wreath from r to the canvas edge, with clusters of red berries and a red bow
+// at the bottom (the star at the top is the pointer, in CSS). It doesn't turn with the
+// wheel, and it's drawn the same every time (no Math.random), so redraws don't flicker.
+function drawWreath(ctx, c, r) {
+  const outer = c - 2;
+  const mid = (r + outer) / 2;
+  const width = outer - r;
+
+  ctx.beginPath();
+  ctx.arc(c, c, mid, 0, TAU);
+  ctx.strokeStyle = '#1b5e20';
+  ctx.lineWidth = width;
+  ctx.stroke();
+
+  // Needles: short strokes leaning along the ring, in three greens
+  const needles = 140;
+  ctx.lineWidth = Math.max(1.5, width * 0.12);
+  ctx.lineCap = 'round';
+  for (let i = 0; i < needles; i++) {
+    const a = (i / needles) * TAU;
+    const rr = r + width * (0.15 + ((i * 7) % 10) / 14);
+    const len = width * 0.45;
+    ctx.beginPath();
+    ctx.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr);
+    ctx.lineTo(c + Math.cos(a + len / rr) * (rr + len * 0.3), c + Math.sin(a + len / rr) * (rr + len * 0.3));
+    ctx.strokeStyle = ['#2e7d32', '#388e3c', '#43a047'][i % 3];
+    ctx.stroke();
+  }
+  ctx.lineCap = 'butt';
+
+  // Berries: three together, every 45°, but not under the bow
+  const berry = Math.max(2, width * 0.16);
+  for (let k = 0; k < 8; k++) {
+    const a = -Math.PI / 2 + (k + 0.5) * (TAU / 8);
+    if (Math.abs(Math.sin(a) - 1) < 0.2) continue; // the bottom, where the bow sits
+    for (const [da, dr] of [[-0.04, -0.15], [0.04, -0.15], [0, 0.18]]) {
+      ctx.beginPath();
+      ctx.arc(c + Math.cos(a + da) * (mid + dr * width), c + Math.sin(a + da) * (mid + dr * width), berry, 0, TAU);
+      ctx.fillStyle = '#d32f2f';
+      ctx.fill();
+    }
+  }
+
+  // The bow at the bottom: two loops, two tails and a knot
+  const bx = c, by = c + mid, s = width * 1.15;
+  ctx.fillStyle = '#c62828';
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.bezierCurveTo(bx + side * s * 1.6, by - s * 1.1, bx + side * s * 1.9, by + s * 0.6, bx, by);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(bx + side * s * 0.9, by + s * 1.3);
+    ctx.lineTo(bx + side * s * 0.45, by + s * 1.15);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(bx, by, s * 0.32, 0, TAU);
+  ctx.fillStyle = '#a31f1f';
+  ctx.fill();
 }
 
 // velocity: optional flick speed in rad/ms (negative = anticlockwise) from dragging the
