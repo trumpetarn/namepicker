@@ -149,6 +149,25 @@ h1 {
   text-align: center;
 }
 
+/* Link to the repo, so friends can suggest changes */
+#source-link {
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#source-link a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+#source-link a:hover,
+#source-link a:focus-visible {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
 textarea {
   width: 100%;
   min-height: 180px;
