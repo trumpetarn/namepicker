@@ -16,22 +16,27 @@ Ideas and bug reports are welcome as [issues](https://github.com/trumpetarn/name
 
 A merged pull request doesn't go live by itself. The site [jakobmarkgren.se](https://jakobmarkgren.se) includes this repo as a git submodule, and changes go live when the site's owner updates the submodule.
 
-## Running it locally
+## Setup
 
-Needs Python 3:
+You need Node.js 24 (the version CI uses), [pnpm](https://pnpm.io) and Python 3. `corepack enable pnpm` sets up the pnpm version pinned in `package.json`. Corepack comes with Node.js 24 and older; on newer versions, install it first with `npm install -g corepack`. Then:
 
 ```sh
-python3 -m http.server 8000     # or: pnpm serve
+pnpm install
+```
+
+## Running it locally
+
+```sh
+pnpm serve
 ```
 
 Then open <http://localhost:8000/>. The links in the site menu (top left) go to other pages of jakobmarkgren.se, so they don't work locally.
 
+`pnpm serve` runs Python's built-in web server. Without pnpm, run `python3 -m http.server 8000` instead.
+
 ## Checks
 
-Needs Node.js 24 (the version CI uses) and [pnpm](https://pnpm.io). `corepack enable pnpm` sets up the pnpm version pinned in `package.json`. Corepack comes with Node.js 24 and older; on newer versions, install it first with `npm install -g corepack`.
-
 ```sh
-pnpm install
 pnpm check          # lint, type check and tests; the same as CI runs on pull requests
 ```
 

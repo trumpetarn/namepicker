@@ -17,8 +17,8 @@ The namepicker ("Namnväljare") of [jakobmarkgren.se](https://jakobmarkgren.se),
 ## Commands
 
 ```sh
-python3 -m http.server 8000   # or pnpm serve; open http://localhost:8000/
 pnpm install
+pnpm serve          # python3 -m http.server 8000; open http://localhost:8000/
 pnpm check          # all of the below
 pnpm lint           # ESLint (eslint.config.js), incl. inline <script>s in index.html
 pnpm typecheck      # tsc --checkJs: tsconfig/app.json (the page), tsconfig/sw.json (the service worker)
