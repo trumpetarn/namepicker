@@ -8,6 +8,7 @@
 .claude/
 node_modules/
 tests/
+scripts/
 tsconfig/
 .deployignore
 .gitattributes

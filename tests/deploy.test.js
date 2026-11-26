@@ -20,11 +20,13 @@ const { assetUrls } = loadScripts(['sw.js'], {
 const used = new Set(['index.html', 'sw.js']);
 for (const [, ref] of html.matchAll(/\b(?:href|src)="([^"?#:/][^"?#:]*)"/g)) used.add(ref.split('/')[0]);
 for (const url of assetUrls('', BASE)) used.add(url.slice(BASE.length).split('/')[0]);
+// Absolute links to this folder in <meta>, e.g. og:image
+for (const [, url] of html.matchAll(/content="https:\/\/jakobmarkgren\.se\/namepicker\/([^"?#]+)"/g)) used.add(url.split('/')[0]);
 
 test('every top-level file is either used by the page or in .deployignore', () => {
   for (const name of readdirSync(ROOT)) {
     assert.ok(used.has(name) || ignored.includes(name),
-      `${name} isn't linked from index.html or sw.js: add it to .deployignore if it isn't part of the page`);
+      `${name} isn't used by index.html or sw.js: add it to .deployignore if it isn't part of the page`);
   }
 });
 
