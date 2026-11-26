@@ -54,5 +54,5 @@ test('the worker\'s extra files exist, and it isn\'t registered under another na
   const extra = assetUrls('', BASE);
   assert.ok(extra.length > 0);
   for (const url of extra) assert.ok(existsSync(join(DIR, url.slice(BASE.length))), `${url} doesn't exist`);
-  assert.match(readFileSync(join(DIR, 'app.js'), 'utf8'), /serviceWorker\?\.register\('sw\.js'/);
+  assert.match(readFileSync(join(DIR, 'js/app.js'), 'utf8'), /serviceWorker\?\.register\('sw\.js'/);
 });

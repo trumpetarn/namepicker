@@ -16,6 +16,35 @@ Ideas and bug reports are welcome as [issues](https://github.com/trumpetarn/name
 
 A merged pull request doesn't go live by itself. The site [jakobmarkgren.se](https://jakobmarkgren.se) includes this repo as a git submodule, and changes go live when the site's owner updates the submodule.
 
+## Where things are
+
+```
+index.html            the page, served at jakobmarkgren.se/namepicker/
+namepicker.css        all of its styles, with the colour themes at the top
+manifest.webmanifest  makes the page installable as an app
+sw.js                 service worker: makes the app work offline
+js/                   the page's scripts, loaded in the order index.html lists them
+  random.js             the random pick that decides who wins
+  groups.js             groups of names (the tabs) and saving them
+  history.js            the history of picks
+  stats.js              statistics over the history
+  share.js              share links
+  transfer.js           importing and exporting files
+  theme.js              the colour themes (dark, light, clown)
+  effects.js            the winner's spotlight, confetti and sounds
+  app.js                ties it together: buttons, the draw, start-up
+  draws/                the four draw animations
+    wheel.js              spinning wheel
+    hat.js                hat
+    slot.js               slot machine
+    remote.js             TV remote
+assets/               icons, fonts and the link preview image
+scripts/images.py     draws the icons and the link preview
+tests/                tests for the scripts (pnpm test)
+```
+
+The rest of the root is configuration for the tools: `package.json`, `eslint.config.js`, `tsconfig/`, `.github/` (CI) and `.deployignore`.
+
 ## Setup
 
 You need Node.js 24 (the version CI uses), [pnpm](https://pnpm.io) and Python 3. `corepack enable pnpm` sets up the pnpm version pinned in `package.json`. Corepack comes with Node.js 24 and older; on newer versions, install it first with `npm install -g corepack`. Then:
@@ -43,13 +72,13 @@ pnpm check          # lint, type check and tests; the same as CI runs on pull re
 ## Guidelines
 
 - Names come from other people's share links and files, so display them with `textContent` or on a canvas, never with `innerHTML`.
-- Use `randomInt` from `random.js` for anything that decides who wins. `Math.random` is fine for visual effects.
+- Use `randomInt` from `js/random.js` for anything that decides who wins. `Math.random` is fine for visual effects.
 - The site menu and the site theme block at the top of `index.html` are identical on every page of jakobmarkgren.se, so please don't change them. The checks here only compare the theme colours in `namepicker.css` with that block; the rest is checked when the site picks up your change.
 - Every top-level file is either part of the page or listed in `.deployignore`, and the tests check this. Add new tooling files (configs, docs) to `.deployignore`.
-- The link preview `og.png` and the app icons in `icons/` are drawn by `scripts/images.py` (needs Python with [Pillow](https://pypi.org/project/pillow/)). A changed image needs a new file name, because they're cached for 30 days.
+- The link preview `assets/og.png` and the app icons in `assets/icons/` are drawn by `scripts/images.py` (needs Python with [Pillow](https://pypi.org/project/pillow/)). A changed image needs a new file name, because they're cached for 30 days.
 
 [CLAUDE.md](CLAUDE.md) describes how everything works in more detail.
 
 ## License
 
-[MIT](LICENSE). The bundled Comic Neue fonts in `fonts/` are under the [SIL Open Font License](fonts/OFL.txt).
+[MIT](LICENSE). The bundled Comic Neue fonts in `assets/fonts/` are under the [SIL Open Font License](assets/fonts/OFL.txt).

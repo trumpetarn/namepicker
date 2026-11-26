@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Draws the namepicker's link-preview image (og.png, 1200x630, the page's og:image)
-and its app icons in icons/.
+"""Draws the namepicker's link-preview image (assets/og.png, 1200x630, the page's og:image)
+and its app icons in assets/icons/.
 
 Run from the repo root after changing the look: python3 scripts/images.py
 Needs Pillow and a light sans-serif font (Ubuntu Sans by default; pass another
@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-ICONS = ROOT / 'icons'
+ICONS = ROOT / 'assets' / 'icons'
 ICON_SIZES = [180, 192, 512]  # apple-touch-icon, then the manifest's two
 W, H = 1200, 630
 S = 2  # drawn at twice the size, then scaled down for smooth edges
@@ -74,8 +74,8 @@ def preview_image(path):
     d.text((x * S, 372 * S), 'med lyckohjul, hatt, enarmad bandit', font=body, fill=MUTED, anchor='ls')
     d.text((x * S, 414 * S), 'eller fjärrkontroll.', font=body, fill=MUTED, anchor='ls')
     spaced(d, (x, 560), 'jakobmarkgren.se', font(path, 20, 300), FAINT, 2)
-    img.resize((W, H), Image.LANCZOS).save(ROOT / 'og.png', optimize=True)
-    print('wrote', ROOT / 'og.png')
+    img.resize((W, H), Image.LANCZOS).save(ROOT / 'assets' / 'og.png', optimize=True)
+    print('wrote', ROOT / 'assets' / 'og.png')
 
 
 def icons():

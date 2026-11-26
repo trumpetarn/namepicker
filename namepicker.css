@@ -4,14 +4,14 @@
    Only downloaded when a device actually falls back to it. */
 @font-face {
   font-family: "Comic Neue";
-  src: url("fonts/comic-neue-400.woff2") format("woff2");
+  src: url("assets/fonts/comic-neue-400.woff2") format("woff2");
   font-weight: 100 400;
   font-display: swap;
 }
 
 @font-face {
   font-family: "Comic Neue";
-  src: url("fonts/comic-neue-700.woff2") format("woff2");
+  src: url("assets/fonts/comic-neue-700.woff2") format("woff2");
   font-weight: 500 900;
   font-display: swap;
 }

@@ -15,12 +15,11 @@ export default [
     },
   },
 
-  // The page: plain browser scripts (no modules), in .js files or inline in
-  // index.html. They share globals across files, so no-undef is off; tsc
-  // (tsconfig/app.json) resolves names across the whole page instead.
+  // The page: plain browser scripts (no modules), in js/ or inline in
+  // index.html, plus the service worker. They share globals across files, so
+  // no-undef is off; tsc (tsconfig/) resolves names across the page instead.
   {
-    files: ['*.{js,html}'],
-    ignores: ['eslint.config.js'],
+    files: ['js/**/*.js', 'index.html', 'sw.js'],
     plugins: { html },
     languageOptions: {
       sourceType: 'script',

@@ -19,8 +19,8 @@ const CACHE = 'namepicker-v1';
 const NETWORK_WAIT_MS = 4000;
 const PAGE = new URL('./', sw.location.href).href;
 // Not linked from the HTML's <link>/<script> tags, but needed offline.
-const EXTRA = ['manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png',
-  'fonts/comic-neue-400.woff2', 'fonts/comic-neue-700.woff2'];
+const EXTRA = ['manifest.webmanifest', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png',
+  'assets/fonts/comic-neue-400.woff2', 'assets/fonts/comic-neue-700.woff2'];
 
 // The page's local CSS/JS, with their ?v= if the deploy added one: the same links
 // scripts/version-assets.js rewrites.

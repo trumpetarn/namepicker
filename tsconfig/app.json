@@ -1,6 +1,5 @@
 {
   "extends": "./base.json",
-  "include": ["../*.js"],
-  // The service worker has its own global scope: sw.json. The ESLint config is Node.
-  "exclude": ["../sw.js", "../eslint.config.js"]
+  // The page's scripts. The service worker (sw.js) has its own global scope: sw.json.
+  "include": ["../js/**/*.js"]
 }
