@@ -21,6 +21,14 @@ const CHRISTMAS_TUNES = [
     unit: 0.09,
     notes: 'G5:3 F5:1 E5:2 D5:2 C5:2 D5:2 E5:2 C5:2 D5:1 E5:1 F5:1 D5:1 E5:3 D5:1 C5:2 B4:2 C5:4',
   },
+  {
+    // Swedish folk tune: "nu är det jul igen, och nu är det jul igen, och julen vara ska till
+    // påska". The usual key is G major; moved up a fourth to C like the others.
+    name: 'Nu är det jul igen',
+    unit: 0.13,
+    notes: 'C5:1 C5:0.5 C5:0.5 C5:1 G4:1 E4:1 G4:1 C5:1 C5:0.5 C5:0.5 C5:1 G4:1 E4:1 G4:1 ' +
+      'C5:1.5 B4:0.5 C5:1 D5:1 E5:1 F5:1 G5:2 G5:4',
+  },
 ];
 
 const NOTE_FREQUENCIES = {
