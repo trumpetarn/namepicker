@@ -39,3 +39,7 @@ pnpm check          # lint + type check + tests; CI runs the same on every pull 
 - Every top-level file is either part of the page or listed in `.deployignore` (tests check this). Add new tooling files there.
 
 [CLAUDE.md](CLAUDE.md) describes how everything works in more detail.
+
+## License
+
+[MIT](LICENSE). The bundled Comic Neue fonts in `fonts/` are under the [SIL Open Font License](fonts/OFL.txt).
