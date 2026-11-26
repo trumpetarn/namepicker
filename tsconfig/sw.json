@@ -3,5 +3,5 @@
   "compilerOptions": {
     "lib": ["es2023", "webworker"]
   },
-  "include": ["../jakobmarkgren.se/public_html/namepicker/sw.js"]
+  "include": ["../sw.js"]
 }

@@ -1,0 +1,85 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Overview
+
+The namepicker ("Namnväljare") of [jakobmarkgren.se](https://jakobmarkgren.se), served at `/namepicker/`. It's plain static HTML/CSS/JS with no framework, bundler or build step. It was moved out of the site's repo (`trumpetarn/jakobmarkgren_se`) so friends can open pull requests without access to the rest of the site.
+
+## How it's deployed
+
+- This repo's root **is** the served folder. The site repo includes it as a git submodule at `jakobmarkgren.se/public_html/namepicker`, and the site's deploy rsyncs it with everything else.
+- Merging to `main` here deploys nothing. It goes live only when the site repo's submodule is bumped to the new commit (and that reaches the site's `live` branch).
+- Every top-level entry that isn't part of the page must be listed in `.deployignore`. The site's deploy leaves those off the server, and its Cloudflare preview's `.assetsignore` repeats the list. `tests/deploy.test.js` fails on a top-level file that's neither linked from `index.html`/`sw.js` nor listed. When adding an entry, the site repo's `.assetsignore` needs it too (the site's tests check that).
+- At deploy, the site's `scripts/version-assets.js` rewrites each local CSS/JS link to `?v=<content hash>`, because the host caches static files for 30 days. Commit plain links (`href="namepicker.css"`), never `?v=`. That the service worker also caches the versioned links is tested in the site repo, which owns that script.
+- The site menu (top-left `<details class="site-menu">`, its `<style>` and closing `<script>`) and the site theme block (`/* Site theme */` `:root` variables and the first `<script>` in `<head>`) are identical on every page of the site, and the site repo's tests compare them, so don't edit them here. The site repo's `scripts/og-images.py` draws this repo's `icons/`.
+
+## Commands
+
+```sh
+python3 -m http.server 8000   # or pnpm serve; open http://localhost:8000/
+pnpm install
+pnpm check          # all of the below
+pnpm lint           # ESLint (eslint.config.js), incl. inline <script>s in index.html
+pnpm typecheck      # tsc --checkJs: tsconfig/app.json (the page), tsconfig/sw.json (the service worker)
+pnpm test           # node:test, tests/*.test.js
+```
+
+`.github/workflows/checks.yml` runs all three on every PR and on pushes to `main`. The package manager is **pnpm**, pinned in `package.json`'s `packageManager`; `npm install` is refused on purpose (`engines` + `engine-strict` in `.npmrc`).
+
+- **Type check:** the scripts are plain JS checked by `tsc` (TypeScript 7), non-strict. When a DOM lookup's type matters, cast it with JSDoc, e.g. `/** @type {HTMLCanvasElement} */ (document.getElementById('wheel'))`. `sw.js` runs in a worker's global scope, so it's its own project with the webworker lib.
+- **Lint:** `no-undef` is off for the page's scripts because they share globals across files; `tsc` catches undefined names instead. Empty `catch {}` blocks are allowed (used on purpose).
+- **Tests:** `tests/load-scripts.js` runs the non-module scripts in a `vm` context with shared globals, like the page's `<script>` tags, so plain functions can be tested without a browser.
+
+## Architecture
+
+The page follows the site's conventions: dark background, thin white system-font text, uppercase letter-spaced nav, Swedish `lang="sv"` copy, `sv-SE` locale formatting.
+
+`index.html` + `namepicker.css` + plain (non-module) scripts that share globals, loaded in this order:
+
+- `random.js` — `randomInt(n)`, an unbiased `crypto.getRandomValues` pick. Use it for anything that decides a draw's outcome; `Math.random` is only for visual effects.
+- `theme.js` (colour modes), `effects.js` (spotlight, confetti, sounds), `groups.js` (state, tabs, `MODES`/`MODE_NAMES`), `history.js`, `stats.js`, `share.js`, `transfer.js` (file import/export), `wheel.js`, `hat.js`, `slot.js` (reel + lever), `remote.js`.
+- `app.js` last — mode switching, the draw, event wiring, init.
+
+`sw.js` (service worker) and `manifest.webmanifest` aren't page scripts; see [Installable and offline](#architecture) below.
+
+**Draws.** The winner is chosen first, then one of four animations is steered to land on it: a canvas spinning wheel (`Lyckohjulet`), a hat draw (`Hatten`), a looping slot-machine reel (`Enarmade banditen`), or a canvas TV remote that spins in a still ring of names and stops pointing at the winner (`Fjärrkontrollen`).
+- The mode buttons use short labels (`Hjulet`, `Hatten`, `Banditen`, `Fjärren`) because the full names don't fit on one row; the full names are in their `title`, in `Metoder` and in the history. The row wraps on very narrow screens, and `main` is a size container, so the row, the group actions and the history adapt via `@container` queries.
+- `Slumpa`, next to the mode buttons, picks one of them at random: a highlight runs over the buttons and stops on the pick, which becomes the selected mode. It doesn't start a draw.
+- Besides the button, a draw starts by clicking or flick-dragging the wheel or the remote (the flick sets direction, turns and speed, but the winner is still pre-chosen; both use `addSpinDrag` in `wheel.js`), clicking the hat, or clicking/dragging the slot machine's lever.
+- Every draw ends with a full-screen spotlight of the winner's name (`showSpotlight` in `effects.js`; fades after 4 s or on click/key press, and the name stays in `#result`), canvas confetti and a Web Audio fanfare. The spotlight shrinks a long name until each word fits (`fitSpotlightName`) rather than splitting words.
+
+**Groups and history.** Names are organised in named groups shown as tabs. Each group has:
+- its own name list;
+- its own enabled methods: the `Metoder` button opens checkboxes, stored as `group.modes` (absent = all). Disabled methods are hidden from the row and skipped by `Slumpa`, and at least one stays on;
+- its own history: every pick, each with the method used (`mode`; an imported method that isn't one of ours is kept as free text in `entry.method`). There's no cap; the list shows the newest 25 until `Visa alla`.
+- An entry can be **excluded** (`excluded: true`) — a test spin, a redraw, a mistake: the `×` on its row toggles it (shown struck through and faded), and for 10 s after a draw an `Ångra` button under the result excludes that pick (`offerUndo` in `history.js`). A draw that lands less than a minute after the previous pick in the same group excludes that previous pick automatically, as a redraw (`excludeIfRedraw`, `REDRAW_MS`); its `↺` brings it back. Excluded entries stay in the list and the group file, but `includedEntries()` leaves them out of the CSV export and should be used for anything that counts picks (statistics, jakobmarkgren_se#78).
+- `Statistik` by the history heading swaps the list for statistics of the active group (`stats.js`): picks per person (people in the name list who were never picked show 0) and per method as bar tables, and a method-per-person table where the 4 most used methods get a column and the rest share `Övriga`, for a period (`Allt`, `I år`, last 3 months, last 30 days; undated entries only count under `Allt`). `computeStats` is a pure function over `includedEntries`. The bars use `--series-1`, set per theme and checked for contrast against each theme's `--bg`; the bars are table rows, so the numbers are also there for screen readers.
+
+**Files and sharing.**
+- *Exportera CSV* exports the active group's history as semicolon-separated, BOM-prefixed CSV (for Swedish Excel).
+- The `Fil` panel (and `Importera` by the history) reads that CSV back into the active group — merge (drops same name + method + minute duplicates) or replace. Only the export's own format is accepted (`historyFromCsv` in `transfer.js`: UTF-8, semicolons, the exact header row, `YYYY-MM-DD` + `HH:MM`); any other file, or any bad row, rejects the whole import with a message naming the row rather than importing part of it.
+- `Fil` also exports the whole group (names, `modes`, history) as versioned JSON (`format: 'namnvaljare-grupp'`, `version: 1`); importing one always creates a new group.
+- The share button produces a link carrying the group's name and names base64url-encoded in the URL fragment (`#dela=…`), which the page imports on load after confirmation.
+- Names can come from other people's share links and files, so render them with `textContent`/canvas, never `innerHTML`.
+
+**Themes.** Three colour modes — `Mörkt`, `Ljust` and `Clown` — are picked top-right. `Mörkt` and `Ljust` are the site theme: the switch saves `site-theme` like the site menu does. `Clown` is the namepicker's own: `data-clown` on `<html>` (`localStorage` `namepicker-clown`), on top of the site theme. Other pages ignore it, and picking anything in the site menu's Tema leaves it. A small inline `<head>` script, before the site theme script, applies Clown before render and migrates the old `namepicker-theme` key once. `theme.js` watches both attributes with a `MutationObserver`, so any change, wherever it comes from, updates the switch and redraws the canvases.
+- Page colours in `namepicker.css` are CSS variables (`--bg`, `--fg`, `--surface`, `--border`, `--muted`, …) defined per theme at the top. Use those rather than hex values for page chrome; objects like the hat slips, lever and remote body keep fixed colours.
+- The canvases read the variables via `themeColors` from `theme.js`, and a theme change calls `refreshStage()`.
+- The default and light themes' site variables must equal the site theme block's two modes, and each theme also sets the site variables the menu uses (`--rule`, `--secondary`, `--bright`), so the site menu follows the colour mode.
+- Clown mode adds polka dots, a rainbow title/spotlight, Comic Sans (falling back to the bundled Comic Neue in `fonts/`, SIL OFL, for devices without it) and a horn after the fanfare.
+
+**Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by the site repo's `scripts/og-images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
+- No version is written in `sw.js`. It reads the page's CSS/JS links out of `index.html`, with whatever `?v=` the deploy gave them, and caches exactly those plus its `EXTRA` list (manifest, icons, fonts). When a new file is needed offline and isn't linked from the HTML, add it to `EXTRA`.
+- The page is fetched **network first**, so a new deploy shows on the next visit with a connection. The cached copy is used offline, or after `NETWORK_WAIT_MS` (4 s) on a bad connection. Each fresh page also caches its new `?v=` assets and drops the old ones. Versioned assets come from the cache first. Unversioned ones (the preview, a local server) come from the network first.
+- `register('sw.js', { updateViaCache: 'none' })` makes browsers check `sw.js` itself on every visit, despite the host's 30-day cache, which `.htaccess` can't change.
+- **Kill switch:** if the worker ever caches something wrong, set `KILL = true` at the top of `sw.js` and deploy. On the next visit it deletes its caches, unregisters itself and reloads the tab from the network.
+- `sw.js` runs in a worker, not the page, so it has its own type-check project (`tsconfig/sw.json`, webworker lib) and ESLint's service-worker globals. `tests/pwa.test.js` checks the manifest and icons, and that the worker caches every link as committed; the site repo checks it does after `version-assets.js` too.
+
+**`localStorage` keys.**
+- `namepicker-groups` — all groups + the active group.
+- `namepicker-mode`, `namepicker-clown` (the old `namepicker-theme` is migrated: `clown` → `namepicker-clown`, `dark`/`light` → the site's `site-theme`).
+- `namepicker-names-hidden` — collapsed name list, which enlarges the wheel/hat.
+- `namepicker-history-hidden` — history collapsed to its heading, which then shows the count.
+- The legacy `namepicker-names`/`namepicker-history` keys are only read once, to migrate into a "Min grupp" group.
+

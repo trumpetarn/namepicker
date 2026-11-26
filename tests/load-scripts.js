@@ -1,10 +1,10 @@
-// Loads the site's plain (non-module) browser scripts into one shared global
+// Loads the namepicker's plain (non-module) browser scripts into one shared global
 // scope, the way a page's <script> tags do, and returns that scope.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-const SITE = fileURLToPath(new URL('../jakobmarkgren.se/public_html/', import.meta.url));
+const SITE = fileURLToPath(new URL('../', import.meta.url));
 
 export function loadScripts(files, globals = {}) {
   const context = vm.createContext({

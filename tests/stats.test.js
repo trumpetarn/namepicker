@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadScripts, fakeLocalStorage } from './load-scripts.js';
 
 const np = loadScripts(
-  ['namepicker/groups.js', 'namepicker/history.js', 'namepicker/stats.js'],
+  ['groups.js', 'history.js', 'stats.js'],
   { localStorage: fakeLocalStorage() },
 );
 const plain = value => JSON.parse(JSON.stringify(value));

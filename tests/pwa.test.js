@@ -4,11 +4,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadScripts } from './load-scripts.js';
-import { versionLinks } from '../scripts/version-assets.js';
 
 // The namepicker as an installable app: its manifest, icons and service worker.
-const SITE = fileURLToPath(new URL('../jakobmarkgren.se/public_html/', import.meta.url));
-const DIR = join(SITE, 'namepicker');
+const DIR = fileURLToPath(new URL('../', import.meta.url));
 const html = readFileSync(join(DIR, 'index.html'), 'utf8');
 
 const pngSize = path => {
@@ -17,7 +15,7 @@ const pngSize = path => {
 };
 
 // sw.js with a stub worker scope: only its top-level functions are used.
-const { assetUrls } = loadScripts(['namepicker/sw.js'], {
+const { assetUrls } = loadScripts(['sw.js'], {
   URL,
   self: { location: { href: 'https://jakobmarkgren.se/namepicker/sw.js' }, addEventListener() {} },
 });
@@ -42,19 +40,14 @@ test('the apple-touch-icon exists and is 180×180', () => {
   assert.deepEqual(pngSize(join(DIR, href)), [180, 180]);
 });
 
-test('the worker caches every local CSS/JS link, with the version the deploy gives it', () => {
+// That it also caches them with the ?v= the deploy adds is checked in the site's
+// repo (jakobmarkgren_se), which owns the deploy script.
+test('the worker caches every local CSS/JS link', () => {
   const links = [...html.matchAll(/\b(?:href|src)="([^"?#:/][^"?#:]*\.(?:css|js))"/g)].map(m => BASE + m[1]);
   assert.ok(links.length > 10, 'found the page\'s scripts');
 
   const plain = assetUrls(html, BASE);
   for (const url of links) assert.ok(plain.includes(url), `${url} not cached`);
-
-  const deployed = versionLinks(html, join(DIR, 'index.html'), SITE);
-  const versioned = assetUrls(deployed, BASE);
-  for (const url of links) {
-    assert.ok(versioned.some(u => new RegExp(`^${url.replace(/\./g, '\\.')}\\?v=[0-9a-f]{10}$`).test(u)), `${url}?v= not cached`);
-  }
-  assert.ok(!versioned.some(u => /\.(css|js)$/.test(u)), 'no unversioned CSS/JS after deploy');
 });
 
 test('the worker\'s extra files exist, and it isn\'t registered under another name', () => {

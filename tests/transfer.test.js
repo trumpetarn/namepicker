@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadScripts, fakeLocalStorage } from './load-scripts.js';
 
 const np = loadScripts(
-  ['namepicker/groups.js', 'namepicker/history.js', 'namepicker/transfer.js'],
+  ['groups.js', 'history.js', 'transfer.js'],
   { localStorage: fakeLocalStorage() },
 );
 

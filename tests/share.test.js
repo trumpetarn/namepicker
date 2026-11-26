@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadScripts, fakeLocalStorage } from './load-scripts.js';
 
 const { encodeShare, decodeShare } = loadScripts(
-  ['namepicker/groups.js', 'namepicker/share.js'],
+  ['groups.js', 'share.js'],
   { localStorage: fakeLocalStorage() },
 );
 

@@ -1,0 +1,21 @@
+# Files in this repo that aren't part of the page. The site's deploy leaves them
+# off the server, and its Cloudflare preview's .assetsignore lists them too.
+# One top-level name per line; a trailing / marks a folder.
+# tests/deploy.test.js fails if a new top-level file is neither listed here nor
+# used by the page.
+.git
+.github/
+.claude/
+node_modules/
+tests/
+tsconfig/
+.deployignore
+.gitattributes
+.gitignore
+.npmrc
+eslint.config.js
+package.json
+pnpm-lock.yaml
+README.md
+CLAUDE.md
+LICENSE

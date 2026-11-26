@@ -32,7 +32,7 @@ function spin(names, winnerIdx, random) {
   const offsets = [];
   const math = Object.create(Math);
   math.random = () => random;
-  const ctx = loadScripts(['namepicker/slot.js'], {
+  const ctx = loadScripts(['slot.js'], {
     Math: math,
     document: { getElementById: byId, createElement: fakeElement },
     performance: { now: () => now },
