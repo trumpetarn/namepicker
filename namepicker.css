@@ -593,6 +593,16 @@ main.can-pick #hat:hover {
   transform: rotate(-4deg);
 }
 
+/* Jul swaps the top hat for a Santa hat (both are in the SVG) */
+.hat-santa,
+:root[data-christmas] .hat-top {
+  display: none;
+}
+
+:root[data-christmas] .hat-santa {
+  display: inline;
+}
+
 #hat.shaking {
   animation: hat-shake 0.25s ease-in-out 6;
 }

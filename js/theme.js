@@ -32,14 +32,26 @@ function showTheme() {
   readThemeColors();
 }
 
+// In December Jul is the default (the <head> script turns it on). So then picking Jul
+// saves nothing, and it ends with December; picking anything else saves 'off-<year>',
+// which keeps Jul off for the rest of this December but not the next.
+function decemberYear() {
+  const now = new Date();
+  return now.getMonth() === 11 ? now.getFullYear() : null;
+}
+
 // Turns on one of the namepicker's own modes (or none, with null) and saves it.
 function setOwnTheme(name) {
+  const december = decemberYear();
   for (const [own, { attr, key }] of Object.entries(OWN_THEMES)) {
     const on = own === name;
     if (on) document.documentElement.dataset[attr] = '';
     else delete document.documentElement.dataset[attr];
     try {
-      if (on) localStorage.setItem(key, '1');
+      if (own === 'christmas' && december) {
+        if (on) localStorage.removeItem(key);
+        else localStorage.setItem(key, 'off-' + december);
+      } else if (on) localStorage.setItem(key, '1');
       else localStorage.removeItem(key);
     } catch {}
   }

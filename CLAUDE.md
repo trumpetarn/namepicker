@@ -78,7 +78,8 @@ The page follows the site's conventions: dark background, thin white system-font
 - The canvases read the variables via `themeColors` from `theme.js`, and a theme change calls `refreshStage()`.
 - The default and light themes' site variables must equal the site theme block's two modes, and each theme also sets the site variables the menu uses (`--rule`, `--secondary`, `--bright`), so the site menu follows the colour mode.
 - Clown mode adds polka dots, a rainbow title/spotlight, Comic Sans (falling back to the bundled Comic Neue in `assets/fonts/`, SIL OFL, for devices without it) and a horn after the fanfare.
-- Jul is a winter night (dark blue, gold title, red button) with snow falling behind the page: `js/snow.js` draws it on `#snow-canvas` while `data-christmas` is set, watching the attribute itself, and keeps the flakes still with `prefers-reduced-motion`. The wheel, the remote's dots and the confetti use `CHRISTMAS_COLORS` (`sliceColors()` in `wheel.js`, light enough for the dark names), and sleigh bells follow the fanfare.
+- Jul is a winter night (dark blue, gold title, red button) with snow falling behind the page: `js/snow.js` draws it on `#snow-canvas` while `data-christmas` is set, watching the attribute itself, and keeps the flakes still with `prefers-reduced-motion`. The wheel, the remote's dots and the confetti use `CHRISTMAS_COLORS` (`sliceColors()` in `wheel.js`, light enough for the dark names). Hatten is a Santa hat (the `#hat` SVG has both hats; CSS shows `.hat-top` or `.hat-santa`), and the fanfare is the start of Jingle Bells' chorus (public domain) on bells, with sleigh bells (`playChristmasFanfare` in `effects.js`).
+- **Jul is the default in December.** The `<head>` script turns it on in December unless `namepicker-christmas` is `off-<this year>`. `setOwnTheme` in `theme.js` saves that when another mode is picked in December, so the choice lasts for the rest of that December only; picking Jul in December saves nothing, so it ends with December. Outside December, Jul is saved as `1` like Clown. `tests/theme.test.js` runs the `<head>` script and `theme.js` with fixed dates.
 
 **Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `assets/icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by `scripts/images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
 - No version is written in `sw.js`. It reads the page's CSS/JS links out of `index.html`, with whatever `?v=` the deploy gave them, and caches exactly those plus its `EXTRA` list (manifest, icons, fonts). When a new file is needed offline and isn't linked from the HTML, add it to `EXTRA`.
@@ -89,7 +90,7 @@ The page follows the site's conventions: dark background, thin white system-font
 
 **`localStorage` keys.**
 - `namepicker-groups` — all groups + the active group.
-- `namepicker-mode`, `namepicker-clown`, `namepicker-christmas` (the old `namepicker-theme` is migrated: `clown` → `namepicker-clown`, `dark`/`light` → the site's `site-theme`).
+- `namepicker-mode`, `namepicker-clown`, `namepicker-christmas` (`1`, or `off-<year>` after leaving the December default; the old `namepicker-theme` is migrated: `clown` → `namepicker-clown`, `dark`/`light` → the site's `site-theme`).
 - `namepicker-names-hidden` — collapsed name list, which enlarges the wheel/hat.
 - `namepicker-history-hidden` — history collapsed to its heading, which then shows the count.
 - The legacy `namepicker-names`/`namepicker-history` keys are only read once, to migrate into a "Min grupp" group.
