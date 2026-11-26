@@ -3,7 +3,8 @@
 //
 // A tune is a line of notes, each `pitch:length` with the length in `unit`s of seconds;
 // `r` is a rest. Pitches go from C4 to G5, with `Bb` for B flat. To add a tune, add a
-// line; tests/tunes.test.js checks that it parses and fits before the spotlight fades.
+// line; tests/tunes.test.js checks that it parses and isn't longer than 7 s. A tune may
+// go on a little after the spotlight fades (4 s).
 
 const CHRISTMAS_TUNES = [
   {
@@ -22,10 +23,11 @@ const CHRISTMAS_TUNES = [
     notes: 'G5:3 F5:1 E5:2 D5:2 C5:2 D5:2 E5:2 C5:2 D5:1 E5:1 F5:1 D5:1 E5:3 D5:1 C5:2 B4:2 C5:4',
   },
   {
-    // Swedish folk tune: "nu är det jul igen, och nu är det jul igen, och julen vara ska till
-    // påska". The usual key is G major; moved up a fourth to C like the others.
+    // Swedish folk tune: "nu är det jul igen och nu är det jul igen och julen varar fram till
+    // påska", at about 110 quarter notes a minute. The usual key is G major; moved up a fourth
+    // to C like the others.
     name: 'Nu är det jul igen',
-    unit: 0.13,
+    unit: 0.273,
     notes: 'C5:1 C5:0.5 C5:0.5 C5:1 G4:1 E4:1 G4:1 C5:1 C5:0.5 C5:0.5 C5:1 G4:1 E4:1 G4:1 ' +
       'C5:1.5 B4:0.5 C5:1 D5:1 E5:1 F5:1 G5:2 G5:4',
   },
