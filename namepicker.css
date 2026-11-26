@@ -18,8 +18,8 @@
 
 /* Färglägen: Mörkt and Ljust are the site theme, data-theme on <html> (set by the site
    theme script in <head>, so the page never flashes the wrong one); their site variables
-   must equal the site theme block. Clown is the namepicker's own, data-clown on top of
-   it. Switched by theme.js. The wheel and the remote read these variables too. Objects
+   must equal the site theme block. Clown and Jul are the namepicker's own, data-clown or
+   data-christmas on top of it. Switched by theme.js. The wheel and the remote read these variables too. Objects
    like the hat's slips and the lever keep their colours. */
 :root {
   color-scheme: dark;
@@ -94,6 +94,31 @@
   --spotlight-glow: rgba(229, 57, 53, 0.35);
   --lever-mount: #8e24aa;
   --lever-mount-border: #6a1b9a;
+}
+
+/* Jul: a winter night, with snow (snow.js), red and gold */
+:root[data-christmas] {
+  color-scheme: dark;
+  --bg: #0b1a2e;
+  --fg: #f4f7fb;
+  --surface: #132a45;
+  --border: #2c4a6e;
+  --muted: #8ea7c2;
+  --subtle: #7d95b3;
+  --faint: #6c84a3;
+  --dim: #45607f;
+  --text-soft: #c4d3e3;
+  --rule: #18324f;
+  --secondary: #9fb6cf;
+  --bright: #dbe6f1;
+  --series-1: #e8b64c;
+  --accent-bg: #c62828;
+  --accent-fg: #fff;
+  --accent-hover: #e53935;
+  --spotlight-bg: rgba(11, 26, 46, 0.88);
+  --spotlight-glow: rgba(244, 197, 66, 0.5);
+  --lever-mount: #1b5e20;
+  --lever-mount-border: #2e7d32;
 }
 
 body {
@@ -566,6 +591,16 @@ main.can-pick #remote.dragging {
 
 main.can-pick #hat:hover {
   transform: rotate(-4deg);
+}
+
+/* Jul swaps the top hat for a Santa hat (both are in the SVG) */
+.hat-santa,
+:root[data-christmas] .hat-top {
+  display: none;
+}
+
+:root[data-christmas] .hat-santa {
+  display: inline;
 }
 
 #hat.shaking {
@@ -1335,6 +1370,48 @@ main.can-pick #hat:hover {
 
 @media (prefers-reduced-motion: reduce) {
   :root[data-clown] h1 { animation: none; }
+}
+
+/* Jul: snö bakom sidan, guld och rött */
+#snow-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+:root[data-christmas] body {
+  background: linear-gradient(#071222, #0b1a2e 45%, #10294a) fixed;
+}
+
+/* Above the snow, which falls behind the page */
+:root[data-christmas] main {
+  position: relative;
+  z-index: 1;
+}
+
+:root[data-christmas] h1,
+:root[data-christmas] #spotlight-name {
+  color: #f4c542;
+  text-shadow: 0 0 18px rgba(244, 197, 66, 0.45);
+}
+
+:root[data-christmas] h1::before,
+:root[data-christmas] h1::after {
+  content: "❄" / "";
+  color: #dbe6f1;
+  margin: 0 0.4em;
+  font-size: 0.8em;
+}
+
+:root[data-christmas] #pick-btn {
+  box-shadow: 0 0 0 2px #f4c542, 0 0 16px rgba(244, 197, 66, 0.35);
+}
+
+:root[data-christmas] #result span {
+  color: #f4c542;
 }
 
 /* Små telefoner: mindre marginaler, så innehållet får plats */

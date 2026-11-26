@@ -3,14 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <script>
-    // Clown mode (the namepicker's own, on top of the site theme) before anything renders;
-    // theme.js handles switching. The old namepicker-theme moves to site-theme once.
+    // Clown or Jul (the namepicker's own modes, on top of the site theme) before anything
+    // renders; theme.js handles switching. The old namepicker-theme moves to site-theme once.
+    // In December Jul is the default: on unless namepicker-christmas says 'off-<this year>'
+    // (another mode picked this December, see theme.js).
     try {
       const old = localStorage.getItem('namepicker-theme');
       if (old === 'clown') localStorage.setItem('namepicker-clown', '1');
       else if (old && !localStorage.getItem('site-theme')) localStorage.setItem('site-theme', old);
       localStorage.removeItem('namepicker-theme');
       if (localStorage.getItem('namepicker-clown') === '1') document.documentElement.dataset.clown = '';
+      else {
+        const christmas = localStorage.getItem('namepicker-christmas');
+        const now = new Date();
+        const december = now.getMonth() === 11 && christmas !== 'off-' + now.getFullYear();
+        if (christmas === '1' || december) document.documentElement.dataset.christmas = '';
+      }
     } catch {}
   </script>
   <script>
@@ -229,11 +237,13 @@
       });
     }
   </script>
+  <canvas id="snow-canvas" hidden aria-hidden="true"></canvas>
   <canvas id="confetti-canvas"></canvas>
   <div id="theme-switch" role="group" aria-label="Färgläge">
     <button type="button" data-theme="dark">Mörkt</button>
     <button type="button" data-theme="light">Ljust</button>
     <button type="button" data-theme="clown">Clown</button>
+    <button type="button" data-theme="christmas">Jul</button>
   </div>
   <div id="spotlight" hidden aria-hidden="true"><span id="spotlight-name"></span></div>
   <main>
@@ -288,10 +298,27 @@
           <div id="hat-note"><span></span></div>
           <div id="hat-slips"></div>
           <svg id="hat" viewBox="0 0 200 170" role="button" tabindex="0" aria-label="Dra en lapp">
-            <path d="M40 40 L50 150 Q100 168 150 150 L160 40 Z" fill="#222" stroke="#444" stroke-width="2"/>
-            <path d="M41.6 58 L158.4 58 L156.8 76 L43.2 76 Z" fill="#b3261e"/>
-            <ellipse cx="100" cy="40" rx="92" ry="16" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-            <ellipse cx="100" cy="40" rx="60" ry="9" fill="#050505"/>
+            <g class="hat-top">
+              <path d="M40 40 L50 150 Q100 168 150 150 L160 40 Z" fill="#222" stroke="#444" stroke-width="2"/>
+              <path d="M41.6 58 L158.4 58 L156.8 76 L43.2 76 Z" fill="#b3261e"/>
+              <ellipse cx="100" cy="40" rx="92" ry="16" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+              <ellipse cx="100" cy="40" rx="60" ry="9" fill="#050505"/>
+            </g>
+            <!-- Jul: a Santa hat, used as a sack -->
+            <g class="hat-santa">
+              <path d="M30 46 C28 96 44 140 84 150 C118 158 150 140 170 152 C178 157 184 150 180 140 C172 120 172 84 170 46 Z" fill="#c62828"/>
+              <path d="M120 150 C140 140 160 138 172 148 C160 146 140 148 124 154 Z" fill="#8e1b18" opacity="0.7"/>
+              <path d="M58 52 C56 96 66 128 92 146 C68 140 48 110 44 52 Z" fill="#a31f1f" opacity="0.7"/>
+              <circle cx="182" cy="148" r="13" fill="#f5f5f5"/>
+              <circle cx="178" cy="144" r="5" fill="#fff"/>
+              <ellipse cx="100" cy="42" rx="84" ry="18" fill="#f5f5f5"/>
+              <g fill="#f5f5f5">
+                <circle cx="24" cy="48" r="9"/><circle cx="42" cy="54" r="9"/><circle cx="62" cy="58" r="9"/>
+                <circle cx="82" cy="60" r="9"/><circle cx="100" cy="61" r="9"/><circle cx="118" cy="60" r="9"/>
+                <circle cx="138" cy="58" r="9"/><circle cx="158" cy="54" r="9"/><circle cx="176" cy="48" r="9"/>
+              </g>
+              <ellipse cx="100" cy="40" rx="62" ry="9" fill="#4a0d0d"/>
+            </g>
           </svg>
         </div>
       </div>
@@ -351,6 +378,7 @@
   <script src="js/random.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/effects.js"></script>
+  <script src="js/snow.js"></script>
   <script src="js/groups.js"></script>
   <script src="js/history.js"></script>
   <script src="js/stats.js"></script>

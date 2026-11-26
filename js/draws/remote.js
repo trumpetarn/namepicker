@@ -1,5 +1,5 @@
 // Fjärrkontrollen: the names stand still in a ring and a TV remote spins in the middle,
-// stopping with its tip pointing at the winner. Uses TAU, WHEEL_COLORS and fitText from wheel.js,
+// stopping with its tip pointing at the winner. Uses TAU, sliceColors and fitText from wheel.js,
 // and themeColors from theme.js.
 
 const remoteCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('remote'));
@@ -44,6 +44,7 @@ function drawRemote(names) {
   }
 
   const seg = TAU / names.length;
+  const colors = sliceColors();
   const current = remoteTarget(remoteRot, names.length);
   // Scales with the stage, shrinking so neighbouring names don't overlap.
   const fontSize = Math.max(9, Math.min(c * 0.085, seg * textIn * 0.75));
@@ -68,7 +69,7 @@ function drawRemote(names) {
 
     ctx.beginPath();
     ctx.arc(c + Math.cos(phi) * dotR, c + Math.sin(phi) * dotR, hit ? 5 : 3, 0, TAU);
-    ctx.fillStyle = hit ? WHEEL_COLORS[i % WHEEL_COLORS.length] : themeColors.dim;
+    ctx.fillStyle = hit ? colors[i % colors.length] : themeColors.dim;
     ctx.fill();
 
     ctx.save();

@@ -1,6 +1,13 @@
 // Lyckohjulet: canvas spinning wheel.
 
 const WHEEL_COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#f06292'];
+// Jul: red, green, gold and snow, all light enough for the dark names drawn on them.
+const CHRISTMAS_COLORS = ['#ef5350', '#66bb6a', '#f4c542', '#eceff1', '#ff8a80', '#a5d6a7', '#ffd54f', '#b3e5fc'];
+
+// The slice colours for the current colour mode (currentTheme is in theme.js).
+function sliceColors() {
+  return currentTheme() === 'christmas' ? CHRISTMAS_COLORS : WHEEL_COLORS;
+}
 const TAU = Math.PI * 2;
 let wheelRot = 0;
 
@@ -43,15 +50,16 @@ function drawWheel(names) {
   }
 
   const seg = TAU / names.length;
+  const colors = sliceColors();
   // Scales with the wheel (larger when the name list is hidden), shrinking to fit thin slices.
   const fontSize = Math.max(11, Math.min(r * 0.15, seg * r * 0.5));
 
   names.forEach((name, i) => {
     // Slice 0 starts at the pointer (top) and slices run clockwise.
     const start = wheelRot + i * seg - Math.PI / 2;
-    let color = WHEEL_COLORS[i % WHEEL_COLORS.length];
+    let color = colors[i % colors.length];
     // Avoid the last slice sharing a colour with its neighbour, slice 0.
-    if (i > 0 && i === names.length - 1 && i % WHEEL_COLORS.length === 0) color = WHEEL_COLORS[2];
+    if (i > 0 && i === names.length - 1 && i % colors.length === 0) color = colors[2];
 
     ctx.beginPath();
     ctx.moveTo(c, c);
