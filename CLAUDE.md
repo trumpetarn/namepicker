@@ -12,7 +12,7 @@ The namepicker ("Namnväljare") of [jakobmarkgren.se](https://jakobmarkgren.se),
 - Merging to `main` here deploys nothing. It goes live only when the site repo's submodule is bumped to the new commit (and that reaches the site's `live` branch).
 - Every top-level entry that isn't part of the page must be listed in `.deployignore`. The site's deploy leaves those off the server, and its Cloudflare preview's `.assetsignore` repeats the list. `tests/deploy.test.js` fails on a top-level file that's neither linked from `index.html`/`sw.js` nor listed. When adding an entry, the site repo's `.assetsignore` needs it too (the site's tests check that).
 - At deploy, the site's `scripts/version-assets.js` rewrites each local CSS/JS link to `?v=<content hash>`, because the host caches static files for 30 days. Commit plain links (`href="namepicker.css"`), never `?v=`. That the service worker also caches the versioned links is tested in the site repo, which owns that script.
-- The site menu (top-left `<details class="site-menu">`, its `<style>` and closing `<script>`) and the site theme block (`/* Site theme */` `:root` variables and the first `<script>` in `<head>`) are identical on every page of the site, and the site repo's tests compare them, so don't edit them here. The site repo's `scripts/og-images.py` draws this repo's `icons/`.
+- The site menu (top-left `<details class="site-menu">`, its `<style>` and closing `<script>`) and the site theme block (`/* Site theme */` `:root` variables and the first `<script>` in `<head>`) are identical on every page of the site, and the site repo's tests compare them, so don't edit them here. `tests/theme.test.js` checks that `namepicker.css`'s Mörkt and Ljust match the site theme block in `index.html`, so a broken theme fails here and not only when the site bumps the submodule.
 
 ## Commands
 
@@ -30,6 +30,10 @@ pnpm test           # node:test, tests/*.test.js
 - **Type check:** the scripts are plain JS checked by `tsc` (TypeScript 7), non-strict. When a DOM lookup's type matters, cast it with JSDoc, e.g. `/** @type {HTMLCanvasElement} */ (document.getElementById('wheel'))`. `sw.js` runs in a worker's global scope, so it's its own project with the webworker lib.
 - **Lint:** `no-undef` is off for the page's scripts because they share globals across files; `tsc` catches undefined names instead. Empty `catch {}` blocks are allowed (used on purpose).
 - **Tests:** `tests/load-scripts.js` runs the non-module scripts in a `vm` context with shared globals, like the page's `<script>` tags, so plain functions can be tested without a browser.
+
+## Images
+
+`scripts/images.py` (Pillow; not deployed) draws `og.png`, the 1200×630 link preview the page's `og:image` points at (`https://jakobmarkgren.se/namepicker/og.png`), and the app icons in `icons/`. The PNGs are committed. Run `python3 scripts/images.py [--font <ttf>]` after changing the look; the default font is Ubuntu Sans. The host and preview services cache images for 30 days, so give a changed image a new file name and update its references (`og:image`, `manifest.webmanifest`, `sw.js`'s `EXTRA`).
 
 ## Architecture
 
@@ -69,7 +73,7 @@ The page follows the site's conventions: dark background, thin white system-font
 - The default and light themes' site variables must equal the site theme block's two modes, and each theme also sets the site variables the menu uses (`--rule`, `--secondary`, `--bright`), so the site menu follows the colour mode.
 - Clown mode adds polka dots, a rainbow title/spotlight, Comic Sans (falling back to the bundled Comic Neue in `fonts/`, SIL OFL, for devices without it) and a horn after the fanfare.
 
-**Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by the site repo's `scripts/og-images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
+**Installable and offline (PWA).** `manifest.webmanifest` (scope and start URL `/namepicker/`, standalone, dark theme colours) and the icons in `icons/` (180 px apple-touch-icon, 192/512 px for the manifest, drawn by `scripts/images.py` and kept inside the maskable safe zone) make the page installable. `app.js` registers `sw.js`, whose scope is only `/namepicker/`:
 - No version is written in `sw.js`. It reads the page's CSS/JS links out of `index.html`, with whatever `?v=` the deploy gave them, and caches exactly those plus its `EXTRA` list (manifest, icons, fonts). When a new file is needed offline and isn't linked from the HTML, add it to `EXTRA`.
 - The page is fetched **network first**, so a new deploy shows on the next visit with a connection. The cached copy is used offline, or after `NETWORK_WAIT_MS` (4 s) on a bad connection. Each fresh page also caches its new `?v=` assets and drops the old ones. Versioned assets come from the cache first. Unversioned ones (the preview, a local server) come from the network first.
 - `register('sw.js', { updateViaCache: 'none' })` makes browsers check `sw.js` itself on every visit, despite the host's 30-day cache, which `.htaccess` can't change.
