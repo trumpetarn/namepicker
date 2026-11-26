@@ -1,6 +1,6 @@
 # Namepicker
 
-The name picker at [jakobmarkgren.se/namepicker](https://jakobmarkgren.se/namepicker/). It picks a random name from a list with one of four animations (a spinning wheel, a hat, a slot machine or a TV remote). It keeps groups of names, a history of picks, statistics and share links, and it can be installed as an app that works offline.
+The name picker at [jakobmarkgren.se/namepicker](https://jakobmarkgren.se/namepicker/). It picks a random name from a list with one of four animations (a spinning wheel, a hat, a slot machine or a TV remote), plus a fifth, a Christmas present, in the Christmas theme. It keeps groups of names, a history of picks, statistics and share links, and it can be installed as an app that works offline.
 
 The page itself is in Swedish (its name there is *Namnväljare*). Keep text that users see in Swedish; code, comments and docs are in English.
 
@@ -33,12 +33,14 @@ js/                   the page's scripts, loaded in the order index.html lists t
   theme.js              the colour themes (dark, light, clown, Christmas)
   effects.js            the winner's spotlight, confetti and sounds
   snow.js               the snow in the Christmas theme
+  tunes.js              the Christmas theme's fanfare tunes
   app.js                ties it together: buttons, the draw, start-up
-  draws/                the four draw animations
+  draws/                the draw animations
     wheel.js              spinning wheel
     hat.js                hat
     slot.js               slot machine
     remote.js             TV remote
+    gift.js               Christmas present (only in the Christmas theme)
 assets/               icons, fonts and the link preview image
 scripts/images.py     draws the icons and the link preview
 tests/                tests for the scripts (pnpm test)

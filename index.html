@@ -279,6 +279,8 @@
       <button type="button" data-mode="hat" title="Hatten">Hatten</button>
       <button type="button" data-mode="slot" title="Enarmade banditen">Banditen</button>
       <button type="button" data-mode="remote" title="Fjärrkontrollen">Fjärren</button>
+      <!-- Only in Jul (SEASONAL_MODES in groups.js) -->
+      <button type="button" data-mode="gift" title="Julklappen">Klappen</button>
       <button type="button" id="shuffle-mode" title="Slumpa vilken metod som används">Slumpa</button>
     </div>
     <div id="stage">
@@ -325,6 +327,9 @@
       <div class="stage-panel" id="slot-stage">
         <div id="slot-machine">
           <div id="reel-box">
+            <!-- Jul: snow on top and a string of fairy lights (hidden otherwise) -->
+            <div class="snow-cap" aria-hidden="true"></div>
+            <div class="fairy-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div id="reel-window"><div id="reel"></div></div>
             <div id="reel-frame"></div>
           </div>
@@ -333,6 +338,33 @@
             <span id="lever-arm"></span>
             <span id="lever-knob"></span>
           </button>
+        </div>
+      </div>
+      <div class="stage-panel" id="gift-stage">
+        <div id="gift-scene">
+          <div id="gift-tag"><span></span></div>
+          <svg id="gift" viewBox="0 0 200 170" role="button" tabindex="0" aria-label="Öppna julklappen">
+            <g class="gift-box">
+              <rect x="38" y="76" width="124" height="88" rx="4" fill="#c62828"/>
+              <rect x="134" y="76" width="28" height="88" rx="4" fill="#a31f1f"/>
+              <g fill="#f8e7b0" opacity="0.55">
+                <circle cx="56" cy="96" r="3"/><circle cx="74" cy="122" r="3"/><circle cx="56" cy="148" r="3"/>
+                <circle cx="126" cy="98" r="3"/><circle cx="146" cy="124" r="3"/><circle cx="126" cy="150" r="3"/>
+              </g>
+              <rect x="91" y="76" width="18" height="88" fill="#f4c542"/>
+              <rect x="38" y="112" width="124" height="16" fill="#f4c542"/>
+              <rect x="40" y="76" width="120" height="5" fill="#5c0f0f"/>
+            </g>
+            <g class="gift-lid">
+              <rect x="32" y="58" width="136" height="24" rx="3" fill="#d32f2f"/>
+              <rect x="148" y="58" width="20" height="24" rx="3" fill="#b71c1c"/>
+              <rect x="91" y="58" width="18" height="24" fill="#f4c542"/>
+              <path d="M100 56 C80 30 54 34 62 50 C68 60 88 58 100 56 Z" fill="#f4c542" stroke="#c9971f" stroke-width="2"/>
+              <path d="M100 56 C120 30 146 34 138 50 C132 60 112 58 100 56 Z" fill="#f4c542" stroke="#c9971f" stroke-width="2"/>
+              <path d="M96 58 L84 76 L92 74 L96 80 Z M104 58 L116 76 L108 74 L104 80 Z" fill="#e0ac2e"/>
+              <ellipse cx="100" cy="56" rx="9" ry="7" fill="#e0ac2e" stroke="#c9971f" stroke-width="2"/>
+            </g>
+          </svg>
         </div>
       </div>
     </div>
@@ -378,6 +410,7 @@
   <script src="js/random.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/effects.js"></script>
+  <script src="js/tunes.js"></script>
   <script src="js/snow.js"></script>
   <script src="js/groups.js"></script>
   <script src="js/history.js"></script>
@@ -388,6 +421,7 @@
   <script src="js/draws/hat.js"></script>
   <script src="js/draws/slot.js"></script>
   <script src="js/draws/remote.js"></script>
+  <script src="js/draws/gift.js"></script>
   <script src="js/app.js"></script>
 
 </body>
