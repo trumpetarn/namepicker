@@ -1,5 +1,5 @@
 // Fjärrkontrollen: the names stand still in a ring and a TV remote spins in the middle,
-// stopping with its tip pointing at the winner. Uses TAU, WHEEL_COLORS and fitText from wheel.js,
+// stopping with its tip pointing at the winner. Uses TAU, sliceColors and fitText from wheel.js,
 // and themeColors from theme.js.
 
 const remoteCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('remote'));
@@ -44,6 +44,7 @@ function drawRemote(names) {
   }
 
   const seg = TAU / names.length;
+  const colors = sliceColors();
   const current = remoteTarget(remoteRot, names.length);
   // Scales with the stage, shrinking so neighbouring names don't overlap.
   const fontSize = Math.max(9, Math.min(c * 0.085, seg * textIn * 0.75));
@@ -68,7 +69,7 @@ function drawRemote(names) {
 
     ctx.beginPath();
     ctx.arc(c + Math.cos(phi) * dotR, c + Math.sin(phi) * dotR, hit ? 5 : 3, 0, TAU);
-    ctx.fillStyle = hit ? WHEEL_COLORS[i % WHEEL_COLORS.length] : themeColors.dim;
+    ctx.fillStyle = hit ? colors[i % colors.length] : themeColors.dim;
     ctx.fill();
 
     ctx.save();
@@ -151,7 +152,33 @@ function drawRemoteBody(ctx, c, angle) {
     }
   }
 
+  if (currentTheme() === 'christmas') drawRemoteSantaHat(ctx, w, top);
+
   ctx.restore();
+}
+
+// Jul: a small Santa hat on the remote's tip (in the remote's turned coordinates, the
+// tip towards negative y), its tip flopping to the side. It stays short, so it doesn't
+// reach the ring of names.
+function drawRemoteSantaHat(ctx, w, top) {
+  const brim = top + w * 0.5;
+  const tipX = w * 0.55, tipY = top - w * 0.05;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.5, brim);
+  ctx.bezierCurveTo(-w * 0.45, top - w * 0.35, w * 0.2, top - w * 0.55, tipX, tipY);
+  ctx.bezierCurveTo(w * 0.42, top + w * 0.1, w * 0.48, top + w * 0.3, w * 0.5, brim);
+  ctx.closePath();
+  ctx.fillStyle = '#c62828';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.62, brim - w * 0.12, w * 1.24, w * 0.32, w * 0.16);
+  ctx.fillStyle = '#f5f5f5';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(tipX, tipY, w * 0.17, 0, TAU);
+  ctx.fill();
 }
 
 // velocity: optional flick speed in rad/ms (negative = anticlockwise) from dragging the

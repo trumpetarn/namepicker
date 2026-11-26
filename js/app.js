@@ -3,7 +3,7 @@
 let spinning = false;
 
 const MODE_KEY = 'namepicker-mode';
-const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken', remote: 'Snurra fjärren' };
+const PICK_LABELS = { wheel: 'Snurra hjulet', hat: 'Dra en lapp', slot: 'Dra i spaken', remote: 'Snurra fjärren', gift: 'Öppna julklappen' };
 let mode = MODES.includes(localStorage.getItem(MODE_KEY)) ? localStorage.getItem(MODE_KEY) : 'wheel';
 
 const pickBtn = /** @type {HTMLButtonElement} */ (document.getElementById('pick-btn'));
@@ -44,8 +44,12 @@ function setSpinning(on) {
   spinning = on;
   updatePickEnabled();
   modeBtns.forEach(b => b.disabled = on);
+  // For decorations that follow the draw (Jul's fairy lights on the slot machine)
+  document.querySelector('main').classList.toggle('drawing', on);
   updateGroupControls();
-  renderMethodSettings();
+  // After a draw, also catch up with a colour mode changed during it (Julklappen comes and goes)
+  if (on) renderMethodSettings();
+  else applyEnabledModes();
   renderHistory(); // its exclude buttons are off during a draw
 }
 
@@ -94,9 +98,11 @@ function shuffleMode() {
 const methodSettings = document.getElementById('method-settings');
 const methodSettingsBtn = document.getElementById('method-settings-btn');
 
+// Only methods available in the current colour mode (availableModes in groups.js).
 function enabledModes(group = activeGroup()) {
-  const modes = Array.isArray(group.modes) ? MODES.filter(m => group.modes.includes(m)) : MODES;
-  return modes.length ? modes : MODES;
+  const available = availableModes();
+  const modes = Array.isArray(group.modes) ? available.filter(m => group.modes.includes(m)) : available;
+  return modes.length ? modes : available;
 }
 
 function setModeEnabled(m, on) {
@@ -104,9 +110,9 @@ function setModeEnabled(m, on) {
   const modes = enabledModes(group).filter(x => x !== m);
   if (on) modes.push(m);
   if (!modes.length) return; // keep at least one
-  // Store only a real restriction, so groups with everything on follow new methods too.
-  if (MODES.every(x => modes.includes(x))) delete group.modes;
-  else group.modes = MODES.filter(x => modes.includes(x));
+  const setting = modesSetting(group.modes, modes, availableModes());
+  if (setting) group.modes = setting;
+  else delete group.modes;
   saveGroups();
   applyEnabledModes();
 }
@@ -125,7 +131,7 @@ function renderMethodSettings() {
   const modes = enabledModes();
   const list = document.getElementById('method-list');
   list.replaceChildren();
-  for (const m of MODES) {
+  for (const m of availableModes()) {
     const label = document.createElement('label');
     const box = document.createElement('input');
     box.type = 'checkbox';
@@ -147,7 +153,14 @@ function toggleMethodSettings() {
 
 // --- Dragning ---
 
+let justWonTimer = 0;
+
 function land(winner, usedMode) {
+  // For a moment after a win (Jul's fairy lights glow)
+  const main = document.querySelector('main');
+  main.classList.add('just-won');
+  clearTimeout(justWonTimer);
+  justWonTimer = setTimeout(() => main.classList.remove('just-won'), 2500);
   chosen.textContent = winner;
   chosen.className = 'landing visible';
   setSpinning(false);
@@ -176,14 +189,15 @@ function pickName(velocity) {
   if (mode === 'wheel') spinWheel(names, winnerIdx, done, velocity);
   else if (mode === 'hat') drawFromHat(names, winner, done);
   else if (mode === 'remote') spinRemote(names, winnerIdx, done, velocity);
+  else if (mode === 'gift') openGift(names, winner, done);
   else {
     swingLever();
     spinSlot(names, winnerIdx, done);
   }
 }
 
-// Click (or Enter/Space) on the wheel, the hat or the remote instead of the button.
-for (const el of [document.getElementById('wheel'), document.getElementById('hat'), remoteCanvas]) {
+// Click (or Enter/Space) on the wheel, the hat, the remote or the present instead of the button.
+for (const el of [document.getElementById('wheel'), document.getElementById('hat'), remoteCanvas, document.getElementById('gift')]) {
   el.addEventListener('click', () => {
     // A finished drag of the wheel or the remote already handled itself; ignore the click that follows it.
     if (performance.now() < dragIgnoreClickUntil) return;
@@ -256,6 +270,9 @@ window.addEventListener('hashchange', () => {
 });
 
 modeBtns.forEach(b => b.addEventListener('click', () => b.dataset.mode ? setMode(b.dataset.mode) : shuffleMode()));
+// Julklappen comes and goes with Jul. A change during a draw is caught up in setSpinning.
+new MutationObserver(() => { if (!spinning) applyEnabledModes(); })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ['data-christmas', 'data-clown'] });
 window.addEventListener('resize', () => { if (!spinning) refreshStage(); });
 
 importFromHash();

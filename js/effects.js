@@ -6,7 +6,9 @@ function launchConfetti() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#ffffff'];
+  // Jul: the wheel's red, green, gold and snow instead
+  const colors = currentTheme() === 'christmas' ? [...CHRISTMAS_COLORS, '#ffffff']
+    : ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f1c', '#e040fb', '#00bcd4', '#ffffff'];
   const particles = Array.from({ length: 160 }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * -canvas.height * 0.6,
@@ -135,6 +137,9 @@ function playFanfare() {
     osc.stop(t + duration + 0.05);
   }
 
+  // Jul: Jingle Bells instead (see playChristmasFanfare)
+  if (currentTheme() === 'christmas') return playChristmasFanfare(actx);
+
   // Ascending arpeggio C5–E5–G5, then triumphant chord C5+E5+G5+C6
   note(523.25, 0,    0.13);          // C5
   note(659.25, 0.12, 0.13);          // E5
@@ -149,4 +154,39 @@ function playFanfare() {
     note(420, 1.0, 0.16, 0.12, 'sawtooth', 300);
     note(420, 1.22, 0.24, 0.12, 'sawtooth', 280);
   }
+}
+
+// Jul: a random Christmas tune (tunes.js) on a glockenspiel-like bell, a soft C major
+// chord under its last note, and sleigh bells shaken all the way through.
+function playChristmasFanfare(actx) {
+  // A struck bell: the note plus a quieter overtone, both dying away quickly.
+  function bell(freq, start, duration, vol = 0.22) {
+    for (const [mult, v] of [[1, vol], [2.76, vol * 0.25]]) {
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq * mult;
+      const t = actx.currentTime + start;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(v, t + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      osc.start(t);
+      osc.stop(t + duration + 0.05);
+    }
+  }
+
+  // Sleigh bells: a short burst of high pings.
+  function jingle(start) {
+    for (let i = 0; i < 4; i++) {
+      bell(2600 + Math.random() * 1400, start + i * 0.018, 0.12, 0.025);
+    }
+  }
+
+  const notes = parseTune(pickChristmasTune());
+  for (const { freq, at, length } of notes) bell(freq, at, Math.max(length * 1.6, 0.3));
+  const last = notes[notes.length - 1];
+  for (const freq of [261.63, 392.0, 523.25]) bell(freq, last.at, 1.2, 0.08); // C4, G4, C5
+  for (let t = 0; t <= last.at; t += 0.34) jingle(t);
 }

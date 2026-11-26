@@ -6,8 +6,25 @@
 // instead of mode, and entries saved before modes were recorded have neither.
 const GROUPS_KEY = 'namepicker-groups';
 
-const MODES = ['wheel', 'hat', 'slot', 'remote'];
-const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen', remote: 'Fjärrkontrollen' };
+const MODES = ['wheel', 'hat', 'slot', 'remote', 'gift'];
+const MODE_NAMES = { wheel: 'Lyckohjulet', hat: 'Hatten', slot: 'Enarmade banditen', remote: 'Fjärrkontrollen', gift: 'Julklappen' };
+// Methods that only take part in one colour mode (currentTheme() in theme.js): Julklappen
+// in Jul. Elsewhere they're hidden from the method row, Metoder and Slumpa, but the
+// history still names them and a group keeps whether they're switched on.
+const SEASONAL_MODES = { gift: 'christmas' };
+
+function availableModes(theme = currentTheme()) {
+  return MODES.filter(m => !SEASONAL_MODES[m] || SEASONAL_MODES[m] === theme);
+}
+
+// A group's modes setting after choosing the methods `on` among `available`. Methods not
+// available now (Julklappen outside Jul) keep their previous setting. Returns null when
+// everything is on, so such groups follow new methods too.
+function modesSetting(previous, on, available) {
+  const before = Array.isArray(previous) ? previous : MODES;
+  const after = MODES.filter(m => available.includes(m) ? on.includes(m) : before.includes(m));
+  return after.length === MODES.length ? null : after;
+}
 
 function newId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
