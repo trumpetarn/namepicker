@@ -33,6 +33,7 @@ js/                   the page's scripts, loaded in the order index.html lists t
   theme.js              the colour themes (dark, light, clown, Christmas)
   effects.js            the winner's spotlight, confetti and sounds
   snow.js               the snow in the Christmas theme
+  tunes.js              the Christmas theme's fanfare tunes
   app.js                ties it together: buttons, the draw, start-up
   draws/                the draw animations
     wheel.js              spinning wheel

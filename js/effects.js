@@ -156,9 +156,8 @@ function playFanfare() {
   }
 }
 
-// Jul: the start of Jingle Bells' chorus ("jingle bells, jingle bells, jingle all the
-// way", a public-domain tune from 1857) on a glockenspiel-like bell, over a soft
-// C major chord at the end, with sleigh bells shaken on every beat.
+// Jul: a random Christmas tune (tunes.js) on a glockenspiel-like bell, a soft C major
+// chord under its last note, and sleigh bells shaken all the way through.
 function playChristmasFanfare(actx) {
   // A struck bell: the note plus a quieter overtone, both dying away quickly.
   function bell(freq, start, duration, vol = 0.22) {
@@ -185,16 +184,9 @@ function playChristmasFanfare(actx) {
     }
   }
 
-  const C5 = 523.25, D5 = 587.33, E5 = 659.25, G5 = 783.99;
-  const beat = 0.17;
-  // [note, start in beats, length in beats]
-  const tune = [
-    [E5, 0, 1], [E5, 1, 1], [E5, 2, 2],
-    [E5, 4, 1], [E5, 5, 1], [E5, 6, 2],
-    [E5, 8, 1], [G5, 9, 1], [C5, 10, 1.5], [D5, 11.5, 0.5], [E5, 12, 4],
-  ];
-  for (const [freq, at, length] of tune) bell(freq, at * beat, Math.max(length * beat * 1.6, 0.3));
-  // A soft chord under the last note
-  for (const freq of [C5 / 2, G5 / 2, C5]) bell(freq, 12 * beat, 1.2, 0.08);
-  for (let b = 0; b <= 12; b += 2) jingle(b * beat);
+  const notes = parseTune(pickChristmasTune());
+  for (const { freq, at, length } of notes) bell(freq, at, Math.max(length * 1.6, 0.3));
+  const last = notes[notes.length - 1];
+  for (const freq of [261.63, 392.0, 523.25]) bell(freq, last.at, 1.2, 0.08); // C4, G4, C5
+  for (let t = 0; t <= last.at; t += 0.34) jingle(t);
 }
